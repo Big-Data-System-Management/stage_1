@@ -6,4 +6,5 @@ import java.io.IOException;
 public interface Store {
     void storeData(Book book) throws IOException;
     boolean exists(int bookId);
+    Book getBook(int id);
 }
