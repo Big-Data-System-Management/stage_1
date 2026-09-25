@@ -1,5 +1,6 @@
 # Datos descargados (libros)
 /datalake/
+/datamarts/
 
 # Compilados de Maven
 /target/
