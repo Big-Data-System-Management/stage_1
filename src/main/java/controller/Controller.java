@@ -38,11 +38,14 @@ public class Controller {
             try {
                 store.storeData(book);
                 System.out.println("Libro guardado en Data Lake ID: " + book.id());
+
+                MetadataExtractor extractor = new MetadataExtractor();
+                extractor.extractAndProcess(book);
+
             } catch (IOException e) {
                 System.err.println("Error al guardar libro ID " + book.id() + ": " + e.getMessage());
             }
         };
-
         this.rawBookConsumer = (rb) -> feeder.processData(rb, bookConsumer);
     }
 
