@@ -18,9 +18,8 @@ import java.util.function.IntPredicate;
 
 public class GutenbergCrawler implements BookCrawler {
 
-    private static final int N_THREADS = 2;
-    private static final long MIN_DELAY_MS = 2000;
-    private static final long MAX_DELAY_MS = 4000;
+    private static final long MIN_DELAY_MS = 768;
+    private static final long MAX_DELAY_MS = 1024;
     private static final String URL_PATTERN = "https://www.gutenberg.org/cache/epub/%d/pg%d.txt";
 
     private final HttpClient httpClient;
@@ -35,24 +34,20 @@ public class GutenbergCrawler implements BookCrawler {
 
     @Override
     public void crawl(int startBookId, int endBookId, IntPredicate filter, Consumer<RawBook> rawBookConsumer) {
-        ExecutorService workerPool = Executors.newFixedThreadPool(N_THREADS);
-        for (int bookId = startBookId; bookId <= endBookId; bookId++)
-            submitToThreadPool(bookId, workerPool, filter, rawBookConsumer);
-        workerPool.shutdown();
-        awaitTermination(workerPool);
+        for (int bookId = startBookId; bookId <= endBookId; bookId++) {
+            if (filter != null && !filter.test(bookId)) continue;
+            try {
+                enforceRateLimit();
+                downloadBook(bookId).ifPresent(rawBookConsumer::accept);
+            } catch (Exception e) {
+                System.err.printf("Error al procesar el libro ID %d: %s%n", bookId, e.getMessage());
+            }
+        }
     }
 
     private void submitToThreadPool(int currentId, ExecutorService workerPool, IntPredicate filter, Consumer<RawBook> rawBookConsumer) {
         workerPool.submit(() -> {
-            if (filter != null && !filter.test(currentId)) {
-                return;
-            }
-            try {
-                enforceRateLimit();
-                downloadBook(currentId).ifPresent(rawBookConsumer::accept);
-            } catch (Exception e) {
-                System.err.printf("Error al procesar el libro ID %d: %s%n", currentId, e.getMessage());
-            }
+
         });
     }
 

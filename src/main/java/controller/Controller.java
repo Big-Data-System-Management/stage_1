@@ -72,4 +72,16 @@ public class Controller {
         crawler.crawl(startId, endId, shouldDownloadFilter, rawBookConsumer);
         System.out.println("=== Ciclo de extracción finalizado ===");
     }
+
+    public void downloadSplitAndWrite(int startId, int endId){
+        System.out.println("=== Iniciando ciclo de extracción ===");
+        IntPredicate shouldDownloadFilter = bookId -> {
+            if (this.overwriteMode == OverwriteMode.OVERWRITE) {
+                return true;
+            }
+            return !store.exists(bookId);
+        };
+        crawler.crawl(startId, endId, shouldDownloadFilter, rawBookConsumer);
+        System.out.println("=== Ciclo de extracción finalizado ===");
+    }
 }
