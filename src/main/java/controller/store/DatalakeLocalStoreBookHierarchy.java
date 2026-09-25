@@ -50,6 +50,24 @@ public class DatalakeLocalStoreBookHierarchy implements Store {
     }
 
     @Override
+    public Book getBook(int id) {
+        if (!exists(id)) return null;
+
+        Path targetDir = Paths.get(this.baseDataLakePath, String.valueOf(id));
+        Path headerPath = targetDir.resolve(id + ".header.txt");
+        Path bodyPath = targetDir.resolve(id + ".body.txt");
+
+        try {
+            String header = Files.readString(headerPath);
+            String body = Files.readString(bodyPath);
+            return new Book(id, header, body);
+        } catch (IOException e) {
+            System.err.printf("Error leyendo libro %d: %s%n", id, e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
     public void storeData(Book book) throws IOException {
         Path targetDir = Paths.get(this.baseDataLakePath, String.valueOf(book.id()));
         Files.createDirectories(targetDir);

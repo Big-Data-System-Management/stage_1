@@ -9,14 +9,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class DatalakeLocalStoreTimeHierarchy implements Store {
 
     private final String baseDataLakePath;
-    private final Set<Integer> existingBookIds = ConcurrentHashMap.newKeySet();
+    private final Map<Integer, Path> bookDirectories = new ConcurrentHashMap<>();
 
     public DatalakeLocalStoreTimeHierarchy(String baseDataLakePath) {
         this.baseDataLakePath = baseDataLakePath;
@@ -28,7 +28,7 @@ public class DatalakeLocalStoreTimeHierarchy implements Store {
         if (!Files.exists(basePath)) return;
         try (Stream<Path> stream = Files.walk(basePath)) {
             extractAndAddExistingIds(stream);
-            System.out.printf("[Store] Índice cargado en RAM: %d libros detectados.%n", existingBookIds.size());
+            System.out.printf("[Store Time-Hierarchy] Índice cargado en RAM: %d libros detectados.%n", bookDirectories.size());
         } catch (IOException e) {
             System.err.println("Error indexando Data Lake: " + e.getMessage());
         }
@@ -36,19 +36,37 @@ public class DatalakeLocalStoreTimeHierarchy implements Store {
 
     private void extractAndAddExistingIds(Stream<Path> stream) {
         stream.filter(Files::isRegularFile)
-                .map(path -> path.getFileName().toString())
-                .filter(name -> name.endsWith(".body.txt"))
-                .forEach(name -> {
+                .filter(path -> path.getFileName().toString().endsWith(".body.txt"))
+                .forEach(path -> {
                     try {
-                        int id = Integer.parseInt(name.replace(".body.txt", ""));
-                        existingBookIds.add(id);
+                        String fileName = path.getFileName().toString();
+                        int id = Integer.parseInt(fileName.replace(".body.txt", ""));
+                        bookDirectories.put(id, path.getParent());
                     } catch (NumberFormatException ignored) {}
                 });
     }
 
     @Override
     public boolean exists(int bookId) {
-        return existingBookIds.contains(bookId);
+        return bookDirectories.containsKey(bookId);
+    }
+
+    @Override
+    public Book getBook(int id) {
+        Path targetDir = bookDirectories.get(id); // Búsqueda instantánea O(1)
+        if (targetDir == null) return null;
+
+        Path headerPath = targetDir.resolve(id + ".header.txt");
+        Path bodyPath = targetDir.resolve(id + ".body.txt");
+
+        try {
+            String header = Files.readString(headerPath);
+            String body = Files.readString(bodyPath);
+            return new Book(id, header, body);
+        } catch (IOException e) {
+            System.err.printf("Error leyendo libro %d: %s%n", id, e.getMessage());
+            return null;
+        }
     }
 
     @Override
@@ -56,13 +74,17 @@ public class DatalakeLocalStoreTimeHierarchy implements Store {
         LocalDateTime now = LocalDateTime.now();
         String dateFolder = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String hourFolder = now.format(DateTimeFormatter.ofPattern("HH"));
+
         Path targetDir = Paths.get(this.baseDataLakePath, dateFolder, hourFolder);
         Files.createDirectories(targetDir);
+
         Path headerPath = targetDir.resolve(book.id() + ".header.txt");
         Path bodyPath = targetDir.resolve(book.id() + ".body.txt");
+
         writeAtomically(headerPath, book.head());
         writeAtomically(bodyPath, book.body());
-        existingBookIds.add(book.id());
+
+        bookDirectories.put(book.id(), targetDir);
     }
 
     private static void writeAtomically(Path target, String content) throws IOException {
