@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class Tokenizer {
 
     private static final int MIN_TOKEN_LENGTH = 2;
+    private static final int MAX_TOKEN_LENGTH = 50;
     private static final String STOPWORDS_RESOURCE = "/stopwords.txt";
     private static final Pattern COMBINING_MARKS = Pattern.compile("\\p{M}+");
     private static final Pattern TOKEN = Pattern.compile("[\\p{L}\\p{N}]+");
@@ -44,7 +45,10 @@ public class Tokenizer {
     }
 
     private boolean isValidToken(String token) {
-        return token.length() >= MIN_TOKEN_LENGTH && !stopwords.contains(token);
+        int length = token.codePointCount(0, token.length());
+        return length >= MIN_TOKEN_LENGTH
+                && length <= MAX_TOKEN_LENGTH
+                && !stopwords.contains(token);
     }
 
     private static String normalize(String text) {
