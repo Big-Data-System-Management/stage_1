@@ -1,0 +1,9 @@
+# Datos descargados (libros)
+/datalake/
+
+# Compilados de Maven
+/target/
+
+# Configuración de IntelliJ
+/.idea/
+*.iml
