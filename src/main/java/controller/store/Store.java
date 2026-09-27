@@ -2,8 +2,9 @@ package controller.store;
 
 import model.Book;
 import java.io.IOException;
+import java.nio.file.Path;
 
 public interface Store {
-    void storeData(Book book) throws IOException;
+    Path storeData(Book book) throws IOException;
     boolean exists(int bookId);
 }
