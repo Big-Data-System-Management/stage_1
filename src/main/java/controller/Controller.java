@@ -1,5 +1,9 @@
 package controller;
 
+import controller.datamart.MetadataRepository;
+import controller.datamart.SqliteMetadataRepository;
+import java.nio.file.Path;
+import java.sql.SQLException;
 import controller.feeder.BookCrawler;
 import controller.feeder.BookFeeder;
 import model.Book;
@@ -18,6 +22,7 @@ public class Controller {
 
     private final BookCrawler crawler;
     private final Store store;
+    private final MetadataRepository metadataRepository;
     private final Consumer<Book> bookConsumer;
     private final Consumer<RawBook> rawBookConsumer;
 
@@ -32,6 +37,13 @@ public class Controller {
         this.crawler = crawler;
         this.store = store;
         this.overwriteMode = overwriteMode;
+
+        try {
+            this.metadataRepository = new SqliteMetadataRepository(Path.of("datamart.db"));
+        } catch (IOException | SQLException e) {
+            throw new RuntimeException("Error al inicializar el repositorio de metadatos", e);
+        }
+
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
 
         this.bookConsumer = book -> {
@@ -39,7 +51,7 @@ public class Controller {
                 store.storeData(book);
                 System.out.println("Libro guardado en Data Lake ID: " + book.id());
 
-                MetadataExtractor extractor = new MetadataExtractor();
+                MetadataExtractor extractor = new MetadataExtractor(metadataRepository);
                 extractor.extractAndProcess(book);
 
             } catch (IOException e) {

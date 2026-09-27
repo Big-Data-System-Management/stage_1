@@ -1,14 +1,21 @@
 package controller;
 
+import controller.datamart.MetadataRepository;
+import model.BookMetadata;
+import java.nio.file.Path;
 import model.Book;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MetadataExtractor {
-
+    private final MetadataRepository repository;
     private final Pattern titlePattern = Pattern.compile("Title:\\s*(.+)");
     private final Pattern authorPattern = Pattern.compile("Author:\\s*(.+)");
     private final Pattern languagePattern = Pattern.compile("Language:\\s*(.+)");
+
+    public MetadataExtractor(MetadataRepository repository) {
+        this.repository = repository;
+    }
 
     public void extractAndProcess(Book book) {
         String headerText = book.head();
@@ -23,12 +30,11 @@ public class MetadataExtractor {
 
         System.out.println("Extracted: ID=" + book.id() + " | Title=" + title + " | Author=" + author + " | Lang=" + language);
 
-        saveToDatabase(book.id(), title, author, language);
+        saveToDatabase(book.id(), title, author, language, null);
     }
 
-    private void saveToDatabase(int id, String title, String author, String language) {
-        // Esta función está lista para conectarse a la DB de Joel.
-        // De momento, solo imprimimos para verificar que funciona.
-        System.out.println("Simulando guardado en DB para el libro " + id + "...");
+    private void saveToDatabase(int id, String title, String author, String language, Path bodyPath) {
+        BookMetadata metadata = new BookMetadata(id, title, author, language, bodyPath);
+        repository.save(metadata);
     }
 }
