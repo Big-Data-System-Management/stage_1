@@ -7,3 +7,6 @@
 # Configuración de IntelliJ
 /.idea/
 *.iml
+
+# Datamarts generados (SQLite)
+/datamarts/
