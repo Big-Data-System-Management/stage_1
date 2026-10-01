@@ -65,7 +65,7 @@ public class BookDataProcessBenchmark {
             parsedBooks.addAll(parsed);
         }
         if (rawBooks.size() < TOTAL_BOOKS)
-            throw new IllegalStateException("Solo hay " + rawBooks.size() + " libros vÃ¡lidos, se necesitan " + TOTAL_BOOKS);
+            throw new IllegalStateException("Solo hay " + rawBooks.size() + " libros válidos, se necesitan " + TOTAL_BOOKS);
     }
 
     @Setup(Level.Iteration)
