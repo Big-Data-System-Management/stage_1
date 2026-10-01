@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 public class DatalakeLocalStoreTimeHierarchy implements Store {
 
     private final String baseDataLakePath;
-    private final Map<Integer, Path> bookDirectories = new ConcurrentHashMap<>();
+    private final Map<Integer, Path> bookDirectories = ConcurrentHashMap.newKeySet();
 
     public DatalakeLocalStoreTimeHierarchy(String baseDataLakePath) {
         this.baseDataLakePath = baseDataLakePath;
@@ -28,7 +28,7 @@ public class DatalakeLocalStoreTimeHierarchy implements Store {
         if (!Files.exists(basePath)) return;
         try (Stream<Path> stream = Files.walk(basePath)) {
             extractAndAddExistingIds(stream);
-            System.out.printf("[Store Time-Hierarchy] Índice cargado en RAM: %d libros detectados.%n", bookDirectories.size());
+            System.out.printf("[Store] Índice cargado en RAM: %d libros detectados.%n", bookDirectories.size());
         } catch (IOException e) {
             System.err.println("Error indexando Data Lake: " + e.getMessage());
         }
@@ -53,7 +53,7 @@ public class DatalakeLocalStoreTimeHierarchy implements Store {
 
     @Override
     public Book getBook(int id) {
-        Path targetDir = bookDirectories.get(id); // Búsqueda instantánea O(1)
+        Path targetDir = bookDirectories.get(id);
         if (targetDir == null) return null;
 
         Path headerPath = targetDir.resolve(id + ".header.txt");
@@ -74,16 +74,12 @@ public class DatalakeLocalStoreTimeHierarchy implements Store {
         LocalDateTime now = LocalDateTime.now();
         String dateFolder = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String hourFolder = now.format(DateTimeFormatter.ofPattern("HH"));
-
         Path targetDir = Paths.get(this.baseDataLakePath, dateFolder, hourFolder);
         Files.createDirectories(targetDir);
-
         Path headerPath = targetDir.resolve(book.id() + ".header.txt");
         Path bodyPath = targetDir.resolve(book.id() + ".body.txt");
-
         writeAtomically(headerPath, book.head());
         writeAtomically(bodyPath, book.body());
-
         bookDirectories.put(book.id(), targetDir);
         return bodyPath;
     }
