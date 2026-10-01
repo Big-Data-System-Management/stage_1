@@ -1,40 +1,55 @@
 package controller;
 
 import controller.datamart.MetadataRepository;
-import model.BookMetadata;
-import java.nio.file.Path;
 import model.Book;
+import model.BookMetadata;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MetadataExtractor {
+
+    private static final String UNKNOWN = "Unknown";
+    private static final Pattern TITLE = field("Title");
+    private static final Pattern LANGUAGE = field("Language");
+    private static final List<Pattern> AUTHOR_FIELDS = List.of(
+            field("Author"), field("Editor"), field("Translator"), field("Compiler"));
+
     private final MetadataRepository repository;
-    private final Pattern titlePattern = Pattern.compile("Title:\\s*(.+)");
-    private final Pattern authorPattern = Pattern.compile("Author:\\s*(.+)");
-    private final Pattern languagePattern = Pattern.compile("Language:\\s*(.+)");
 
     public MetadataExtractor(MetadataRepository repository) {
         this.repository = repository;
     }
 
-    public void extractAndProcess(Book book) {
-        String headerText = book.head();
-
-        Matcher titleMatcher = titlePattern.matcher(headerText);
-        Matcher authorMatcher = authorPattern.matcher(headerText);
-        Matcher languageMatcher = languagePattern.matcher(headerText);
-
-        String title = titleMatcher.find() ? titleMatcher.group(1).trim() : "Unknown";
-        String author = authorMatcher.find() ? authorMatcher.group(1).trim() : "Unknown";
-        String language = languageMatcher.find() ? languageMatcher.group(1).trim() : "Unknown";
-
-        System.out.println("Extracted: ID=" + book.id() + " | Title=" + title + " | Author=" + author + " | Lang=" + language);
-
-        saveToDatabase(book.id(), title, author, language, null);
+    public void extractAndProcess(Book book, Path bodyPath) {
+        String header = book.head();
+        String title = find(TITLE, header, " ").orElse(UNKNOWN);
+        String author = findAuthor(header).orElse(UNKNOWN);
+        String language = find(LANGUAGE, header, " ").orElse(UNKNOWN);
+        repository.save(new BookMetadata(book.id(), title, author, language, bodyPath));
     }
 
-    private void saveToDatabase(int id, String title, String author, String language, Path bodyPath) {
-        BookMetadata metadata = new BookMetadata(id, title, author, language, bodyPath);
-        repository.save(metadata);
+    private static Optional<String> findAuthor(String header) {
+        return AUTHOR_FIELDS.stream()
+                .map(pattern -> find(pattern, header, "; "))
+                .flatMap(Optional::stream)
+                .findFirst();
+    }
+
+    private static Pattern field(String name) {
+        return Pattern.compile("^" + name + ":[ \\t]*(.+(?:\\R[ \\t]+.+)*)", Pattern.MULTILINE);
+    }
+
+    private static Optional<String> find(Pattern pattern, String header, String lineSeparator) {
+        Matcher matcher = pattern.matcher(header);
+        if (!matcher.find()) return Optional.empty();
+        String value = matcher.group(1)
+                .replaceAll("\\R[ \\t]+", lineSeparator)
+                .replaceAll("[ \\t]+", " ")
+                .strip();
+        return value.isEmpty() ? Optional.empty() : Optional.of(value);
     }
 }

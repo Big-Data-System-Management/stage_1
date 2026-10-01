@@ -1,9 +1,7 @@
 package controller;
 
 import controller.datamart.MetadataRepository;
-import controller.datamart.SqliteMetadataRepository;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import controller.feeder.BookCrawler;
 import controller.feeder.BookFeeder;
 import model.Book;
@@ -22,38 +20,31 @@ public class Controller {
 
     private final BookCrawler crawler;
     private final Store store;
-    private final MetadataRepository metadataRepository;
+    private final MetadataExtractor metadataExtractor;
     private final Consumer<Book> bookConsumer;
     private final Consumer<RawBook> rawBookConsumer;
 
     private final ScheduledExecutorService scheduler;
     private final OverwriteMode overwriteMode;
 
-    public Controller(BookCrawler crawler, BookFeeder feeder, Store store) {
-        this(crawler, feeder, store, OverwriteMode.SKIP_IF_EXISTS);
+    public Controller(BookCrawler crawler, BookFeeder feeder, Store store, OverwriteMode overwriteMode) {
+        this(crawler, feeder, store, null, overwriteMode);
     }
 
-    public Controller(BookCrawler crawler, BookFeeder feeder, Store store, OverwriteMode overwriteMode) {
+    public Controller(BookCrawler crawler, BookFeeder feeder, Store store,
+                      MetadataRepository metadataRepository, OverwriteMode overwriteMode) {
         this.crawler = crawler;
         this.store = store;
         this.overwriteMode = overwriteMode;
-
-        try {
-            this.metadataRepository = new SqliteMetadataRepository(Path.of("datamart.db"));
-        } catch (IOException | SQLException e) {
-            throw new RuntimeException("Error al inicializar el repositorio de metadatos", e);
-        }
+        this.metadataExtractor = metadataRepository == null ? null : new MetadataExtractor(metadataRepository);
 
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
 
         this.bookConsumer = book -> {
             try {
-                store.storeData(book);
+                Path bodyPath = store.storeData(book);
                 System.out.println("Libro guardado en Data Lake ID: " + book.id());
-
-                MetadataExtractor extractor = new MetadataExtractor(metadataRepository);
-                extractor.extractAndProcess(book);
-
+                if (metadataExtractor != null) metadataExtractor.extractAndProcess(book, bodyPath);
             } catch (IOException e) {
                 System.err.println("Error al guardar libro ID " + book.id() + ": " + e.getMessage());
             }
