@@ -51,6 +51,29 @@ public class DatalakeLocalStoreIdRangeHierarchy implements Store {
     }
 
     @Override
+    public Book getBook(int id) {
+        if (!exists(id)) return null;
+
+        int batchNumber = id / BATCH_SIZE;
+        String batchFolderName = String.format("batch_%d_to_%d",
+                batchNumber * BATCH_SIZE,
+                ((batchNumber + 1) * BATCH_SIZE) - 1);
+
+        Path targetDir = Paths.get(this.baseDataLakePath, batchFolderName);
+        Path headerPath = targetDir.resolve(id + ".header.txt");
+        Path bodyPath = targetDir.resolve(id + ".body.txt");
+
+        try {
+            String header = Files.readString(headerPath);
+            String body = Files.readString(bodyPath);
+            return new Book(id, header, body);
+        } catch (IOException e) {
+            System.err.printf("Error leyendo libro %d: %s%n", id, e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
     public void storeData(Book book) throws IOException {
         int batchNumber = book.id() / BATCH_SIZE;
         String batchFolderName = String.format("batch_%d_to_%d",
