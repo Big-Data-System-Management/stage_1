@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 public class DatalakeLocalStoreTimeHierarchy implements Store {
 
     private final String baseDataLakePath;
-    private final Map<Integer, Path> bookDirectories = ConcurrentHashMap.newKeySet();
+    private final Map<Integer, Path> bookDirectories = new ConcurrentHashMap<>();
 
     public DatalakeLocalStoreTimeHierarchy(String baseDataLakePath) {
         this.baseDataLakePath = baseDataLakePath;

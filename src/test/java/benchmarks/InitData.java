@@ -14,7 +14,7 @@ import model.OverwriteMode;
 
 import java.util.List;
 
-public class initData {
+public class InitData {
     public static void main(String[] args) {
         List<Store> storeList = List.of(
                 new DatalakeLocalStoreBookHierarchy("datalakeBookHierarchy"),
