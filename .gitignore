@@ -10,3 +10,9 @@
 
 # Datamarts generados (SQLite)
 /datamarts/
+
+# Datos generados por los benchmarks
+/datalakeBookHierarchy/
+/datalakeIdRangeHierarchy/
+/datalakeTimeHierarchy/
+/benchmark/raw
