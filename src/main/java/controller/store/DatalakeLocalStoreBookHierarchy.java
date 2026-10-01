@@ -68,7 +68,7 @@ public class DatalakeLocalStoreBookHierarchy implements Store {
     }
 
     @Override
-    public void storeData(Book book) throws IOException {
+    public Path storeData(Book book) throws IOException {
         Path targetDir = Paths.get(this.baseDataLakePath, String.valueOf(book.id()));
         Files.createDirectories(targetDir);
 
@@ -78,6 +78,7 @@ public class DatalakeLocalStoreBookHierarchy implements Store {
         writeAtomically(headerPath, book.head());
         writeAtomically(bodyPath, book.body());
         existingBookIds.add(book.id());
+        return bodyPath;
     }
 
     private static void writeAtomically(Path target, String content) throws IOException {

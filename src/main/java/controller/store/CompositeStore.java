@@ -3,6 +3,7 @@ package controller.store;
 import model.Book;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public class CompositeStore implements Store {
@@ -18,10 +19,11 @@ public class CompositeStore implements Store {
     }
 
     @Override
-    public void storeData(Book book) throws IOException {
+    public Path storeData(Book book) throws IOException {
         for (Store store : stores) {
             store.storeData(book);
         }
+        return Path.of("");
     }
 
     @Override

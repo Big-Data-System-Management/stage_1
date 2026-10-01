@@ -70,7 +70,7 @@ public class DatalakeLocalStoreTimeHierarchy implements Store {
     }
 
     @Override
-    public void storeData(Book book) throws IOException {
+    public Path storeData(Book book) throws IOException {
         LocalDateTime now = LocalDateTime.now();
         String dateFolder = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String hourFolder = now.format(DateTimeFormatter.ofPattern("HH"));
@@ -85,6 +85,7 @@ public class DatalakeLocalStoreTimeHierarchy implements Store {
         writeAtomically(bodyPath, book.body());
 
         bookDirectories.put(book.id(), targetDir);
+        return bodyPath;
     }
 
     private static void writeAtomically(Path target, String content) throws IOException {

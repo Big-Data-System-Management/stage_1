@@ -74,7 +74,7 @@ public class DatalakeLocalStoreIdRangeHierarchy implements Store {
     }
 
     @Override
-    public void storeData(Book book) throws IOException {
+    public Path storeData(Book book) throws IOException {
         int batchNumber = book.id() / BATCH_SIZE;
         String batchFolderName = String.format("batch_%d_to_%d",
                 batchNumber * BATCH_SIZE,
@@ -89,6 +89,7 @@ public class DatalakeLocalStoreIdRangeHierarchy implements Store {
         writeAtomically(headerPath, book.head());
         writeAtomically(bodyPath, book.body());
         existingBookIds.add(book.id());
+        return bodyPath;
     }
 
     private static void writeAtomically(Path target, String content) throws IOException {
