@@ -1,11 +1,13 @@
-package benchmarks;
+package benchmarks.datalake;
 
+import benchmarks.common.BenchmarkRunner;
 import controller.store.DatalakeLocalStoreBookHierarchy;
 import controller.store.DatalakeLocalStoreIdRangeHierarchy;
 import controller.store.DatalakeLocalStoreTimeHierarchy;
 import controller.store.Store;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.runner.RunnerException;
 
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 3, time = 2, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 3, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-public class IncrementalProcessing {
+public class IncrementalProcessingBenchmark {
 
     @Param({"TIME_HIERARCHY", "BOOK_HIERARCHY", "ID_RANGE_HIERARCHY"})
     private String storeStrategy;
@@ -62,5 +64,9 @@ public class IncrementalProcessing {
     public void measureExistsMiss(Blackhole bh) {
         boolean exists = activeStore.exists(nonExistingBookId);
         bh.consume(exists);
+    }
+
+    public static void main(String[] args) throws RunnerException {
+        BenchmarkRunner.run(IncrementalProcessingBenchmark.class);
     }
 }

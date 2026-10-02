@@ -1,4 +1,4 @@
-package benchmarks;
+package benchmarks.datalake;
 
 import controller.Controller;
 import controller.feeder.BookCrawler;

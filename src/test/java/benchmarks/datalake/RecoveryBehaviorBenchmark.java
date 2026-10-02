@@ -1,5 +1,6 @@
-package benchmarks;
+package benchmarks.datalake;
 
+import benchmarks.common.BenchmarkRunner;
 import controller.store.DatalakeLocalStoreBookHierarchy;
 import controller.store.DatalakeLocalStoreIdRangeHierarchy;
 import controller.store.DatalakeLocalStoreTimeHierarchy;
@@ -7,6 +8,7 @@ import controller.store.Store;
 import model.Book;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.runner.RunnerException;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
 @Fork(value=1)
-public class RecoveryBehavior {
+public class RecoveryBehaviorBenchmark {
 
     @Param({"TIME_HIERARCHY", "BOOK_HIERARCHY", "ID_RANGE_HIERARCHY"})
     private String storeStrategy;
@@ -115,5 +117,9 @@ public class RecoveryBehavior {
                         .forEach(File::delete);
             }
         }
+    }
+
+    public static void main(String[] args) throws RunnerException {
+        BenchmarkRunner.run(RecoveryBehaviorBenchmark.class);
     }
 }

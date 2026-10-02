@@ -1,5 +1,6 @@
-package benchmarks;
+package benchmarks.datalake;
 
+import benchmarks.common.BenchmarkRunner;
 import controller.store.DatalakeLocalStoreBookHierarchy;
 import controller.store.DatalakeLocalStoreIdRangeHierarchy;
 import controller.store.DatalakeLocalStoreTimeHierarchy;
@@ -7,6 +8,7 @@ import controller.store.Store;
 import model.Book;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.runner.RunnerException;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -48,4 +50,7 @@ public class LookUpCostBenchmark {
         blackhole.consume(book);
     }
 
+    public static void main(String[] args) throws RunnerException {
+        BenchmarkRunner.run(LookUpCostBenchmark.class);
+    }
 }

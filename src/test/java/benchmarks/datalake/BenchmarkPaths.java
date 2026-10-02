@@ -1,4 +1,4 @@
-package benchmarks;
+package benchmarks.datalake;
 
 import java.nio.file.Path;
 
