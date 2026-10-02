@@ -1,5 +1,6 @@
-package benchmarks;
+package benchmarks.datalake;
 
+import benchmarks.common.BenchmarkRunner;
 import controller.feeder.BookFeeder;
 import controller.feeder.gutenberg.GutenbergBookDownloader;
 import controller.feeder.gutenberg.GutenbergBookProcessor;

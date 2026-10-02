@@ -1,5 +1,6 @@
-package benchmarks;
+package benchmarks.index;
 
+import benchmarks.common.BenchmarkRunner;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import controller.index.InvertedIndex;

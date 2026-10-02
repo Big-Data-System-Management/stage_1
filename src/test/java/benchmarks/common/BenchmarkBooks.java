@@ -1,4 +1,4 @@
-package benchmarks;
+package benchmarks.common;
 
 import controller.feeder.BookFeeder;
 import controller.feeder.gutenberg.GutenbergBookDownloader;

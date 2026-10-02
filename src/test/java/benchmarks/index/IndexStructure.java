@@ -1,4 +1,4 @@
-package benchmarks;
+package benchmarks.index;
 
 import controller.index.HierarchicalFolderIndex;
 import controller.index.InvertedIndex;

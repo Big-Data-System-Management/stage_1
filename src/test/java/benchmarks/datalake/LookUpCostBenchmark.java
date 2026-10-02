@@ -1,5 +1,6 @@
-package benchmarks;
+package benchmarks.datalake;
 
+import benchmarks.common.BenchmarkRunner;
 import controller.store.DatalakeLocalStoreBookHierarchy;
 import controller.store.DatalakeLocalStoreIdRangeHierarchy;
 import controller.store.DatalakeLocalStoreTimeHierarchy;

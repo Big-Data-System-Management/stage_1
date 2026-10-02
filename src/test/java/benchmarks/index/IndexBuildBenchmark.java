@@ -1,5 +1,6 @@
-package benchmarks;
+package benchmarks.index;
 
+import benchmarks.common.BenchmarkBooks;
 import controller.index.InvertedIndex;
 import controller.index.Tokenizer;
 import model.Book;

@@ -1,5 +1,6 @@
-package benchmarks;
+package benchmarks.datalake;
 
+import benchmarks.common.BenchmarkRunner;
 import controller.store.DatalakeLocalStoreBookHierarchy;
 import controller.store.DatalakeLocalStoreIdRangeHierarchy;
 import controller.store.DatalakeLocalStoreTimeHierarchy;
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
 @Fork(value=1)
-public class RecoveryBehavior {
+public class RecoveryBehaviorBenchmark {
 
     @Param({"TIME_HIERARCHY", "BOOK_HIERARCHY", "ID_RANGE_HIERARCHY"})
     private String storeStrategy;
@@ -119,6 +120,6 @@ public class RecoveryBehavior {
     }
 
     public static void main(String[] args) throws RunnerException {
-        BenchmarkRunner.run(RecoveryBehavior.class);
+        BenchmarkRunner.run(RecoveryBehaviorBenchmark.class);
     }
 }

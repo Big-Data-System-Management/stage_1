@@ -1,5 +1,6 @@
-package benchmarks;
+package benchmarks.datalake;
 
+import benchmarks.common.BenchmarkRunner;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
