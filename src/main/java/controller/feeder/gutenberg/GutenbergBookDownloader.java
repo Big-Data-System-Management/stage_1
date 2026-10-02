@@ -1,11 +1,14 @@
 package controller.feeder.gutenberg;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.zip.GZIPInputStream;
 
 public final class GutenbergBookDownloader {
 
@@ -21,21 +24,34 @@ public final class GutenbergBookDownloader {
     }
 
     public static String downloadBook(int bookId) throws IOException, InterruptedException {
-        HttpResponse<String> response = sendRequest(bookId);
+        HttpResponse<byte[]> response = sendRequest(bookId);
         int statusCode = response.statusCode();
 
         if (statusCode == 200) {
-            return response.body();
+            return decode(response.body());
         }
 
         manageOtherStatusCodes(statusCode, bookId);
         return null;
     }
 
-    private static HttpResponse<String> sendRequest(int bookId) throws IOException, InterruptedException {
+    static String decode(byte[] content) throws IOException {
+        if (isGzip(content)) {
+            try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(content))) {
+                content = gzip.readAllBytes();
+            }
+        }
+        return new String(content, StandardCharsets.UTF_8);
+    }
+
+    private static boolean isGzip(byte[] content) {
+        return content.length >= 2 && (content[0] & 0xFF) == 0x1F && (content[1] & 0xFF) == 0x8B;
+    }
+
+    private static HttpResponse<byte[]> sendRequest(int bookId) throws IOException, InterruptedException {
         String url = String.format(URL_PATTERN, bookId, bookId);
         HttpRequest request = createRequest(url);
-        return HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        return HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofByteArray());
     }
 
     private static HttpRequest createRequest(String url) {
