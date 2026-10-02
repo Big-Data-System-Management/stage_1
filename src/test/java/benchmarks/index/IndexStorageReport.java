@@ -118,6 +118,7 @@ public class IndexStorageReport {
 
     private static DiskUsage mongoDiskUsage() {
         try (MongoClient client = MongoClients.create(IndexBenchmarkSupport.MONGO_URI)) {
+            client.getDatabase("admin").runCommand(new Document("fsync", 1));
             Document stats = client.getDatabase(IndexBenchmarkSupport.MONGO_DATABASE)
                     .getCollection(IndexBenchmarkSupport.MONGO_COLLECTION)
                     .aggregate(List.of(new Document("$collStats", new Document("storageStats", new Document()))))
@@ -132,8 +133,9 @@ public class IndexStorageReport {
     }
 
     private static void print(Row row) {
-        System.out.printf(Locale.ROOT, "[BENCHMARK] %-6s %3d libros | %,7d términos | %,8d ms | %,7d ficheros | %,8.2f MB contenido | %,8.2f MB en disco | %,8.2f MB heap%n",
-                row.structure(), row.books(), row.terms(), row.buildMillis(), row.files(),
+        String unit = row.structure() == IndexStructure.MONGO ? "documentos" : "ficheros";
+        System.out.printf(Locale.ROOT, "[BENCHMARK] %-6s %3d libros | %,7d términos | %,8d ms | %,7d %-10s | %,8.2f MB contenido | %,8.2f MB en disco | %,8.2f MB heap%n",
+                row.structure(), row.books(), row.terms(), row.buildMillis(), row.files(), unit,
                 row.contentBytes() / 1e6, row.diskBytes() / 1e6, row.retainedHeapBytes() / 1e6);
     }
 
