@@ -1,5 +1,6 @@
 package benchmarks.index;
 
+import benchmarks.common.BenchmarkFiles;
 import benchmarks.common.BenchmarkRunner;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -7,10 +8,7 @@ import controller.index.InvertedIndex;
 import org.bson.Document;
 import org.openjdk.jmh.runner.RunnerException;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -46,16 +44,8 @@ public final class IndexBenchmarkSupport {
 
     public static void dispose(IndexStructure structure, InvertedIndex index, Path workDir) throws Exception {
         if (index instanceof AutoCloseable closeable) closeable.close();
-        deleteRecursively(workDir);
+        BenchmarkFiles.deleteRecursively(workDir);
         if (structure == IndexStructure.MONGO) dropMongoDatabase();
-    }
-
-    public static void deleteRecursively(Path root) throws IOException {
-        if (root == null || !Files.exists(root)) return;
-        try (Stream<Path> paths = Files.walk(root)) {
-            for (Path path : paths.sorted(Comparator.reverseOrder()).toList())
-                Files.delete(path);
-        }
     }
 
     public static void run(Class<?> benchmark) throws RunnerException {
