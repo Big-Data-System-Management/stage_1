@@ -10,7 +10,6 @@ import org.bson.Document;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ public class IndexStorageReport {
 
     private static final int[] BOOK_COUNTS = {25, 50, 100};
     private static final long BLOCK_SIZE = 4096;
-    private static final Path RESULTS_FILE = Path.of("benchmark", "results", "index_storage.csv");
     private static final String HEADER = "structure,books,terms,build_ms,files,directories,content_bytes,disk_bytes,retained_heap_bytes";
 
     record Row(IndexStructure structure, int books, int terms, long buildMillis,
@@ -58,7 +56,6 @@ public class IndexStorageReport {
             }
         }
         write(rows);
-        System.out.println("[BENCHMARK] Resultados guardados en " + RESULTS_FILE.toAbsolutePath());
     }
 
     private static Row measure(IndexStructure structure, List<Book> corpus, int terms, Tokenizer tokenizer) throws Exception {
@@ -139,9 +136,6 @@ public class IndexStorageReport {
     }
 
     private static void write(List<Row> rows) throws IOException {
-        Files.createDirectories(RESULTS_FILE.getParent());
-        List<String> lines = new ArrayList<>(List.of(HEADER));
-        rows.forEach(row -> lines.add(row.toCsv()));
-        Files.writeString(RESULTS_FILE, String.join("\n", lines) + "\n", StandardCharsets.UTF_8);
+        BenchmarkRunner.writeCsv(IndexStorageReport.class, HEADER, rows.stream().map(Row::toCsv).toList());
     }
 }

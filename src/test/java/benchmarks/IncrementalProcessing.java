@@ -6,6 +6,7 @@ import controller.store.DatalakeLocalStoreTimeHierarchy;
 import controller.store.Store;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.runner.RunnerException;
 
 import java.util.concurrent.TimeUnit;
 
@@ -62,5 +63,9 @@ public class IncrementalProcessing {
     public void measureExistsMiss(Blackhole bh) {
         boolean exists = activeStore.exists(nonExistingBookId);
         bh.consume(exists);
+    }
+
+    public static void main(String[] args) throws RunnerException {
+        BenchmarkRunner.run(IncrementalProcessing.class);
     }
 }

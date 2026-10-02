@@ -3,6 +3,8 @@ package benchmarks;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StorageOverheadBenchmark {
 
@@ -67,8 +69,9 @@ public class StorageOverheadBenchmark {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String[] strategies = {"TIME_HIERARCHY", "BOOK_HIERARCHY", "ID_RANGE_HIERARCHY"};
+        List<String> rows = new ArrayList<>();
 
         for (String strategy : strategies) {
             String path = BenchmarkPaths.getPathForStrategy(strategy);
@@ -77,6 +80,9 @@ public class StorageOverheadBenchmark {
                 if (Files.exists(Paths.get(path))) {
                     StorageMetrics metrics = analyze(path);
                     System.out.println(metrics);
+                    rows.add(String.join(",", strategy, String.valueOf(metrics.totalFiles()),
+                            String.valueOf(metrics.totalDirectories()), String.valueOf(metrics.totalSizeBytes()),
+                            String.valueOf(metrics.averageFileSize())));
                 } else {
                     System.out.println("Ruta no encontrada para analizar.\n");
                 }
@@ -85,5 +91,8 @@ public class StorageOverheadBenchmark {
                 e.printStackTrace();
             }
         }
+
+        BenchmarkRunner.writeCsv(StorageOverheadBenchmark.class,
+                "strategy,files,directories,size_bytes,average_file_size_bytes", rows);
     }
 }

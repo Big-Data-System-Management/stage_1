@@ -4,15 +4,13 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import controller.index.InvertedIndex;
 import org.bson.Document;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public final class IndexBenchmarkSupport {
@@ -63,11 +61,7 @@ public final class IndexBenchmarkSupport {
         String[] structures = availableStructures();
         if (structures.length < IndexStructure.values().length)
             System.out.println("[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.");
-        Options options = new OptionsBuilder()
-                .include(benchmark.getName())
-                .param("structure", structures)
-                .build();
-        new Runner(options).run();
+        BenchmarkRunner.run(benchmark, Map.of("structure", structures));
     }
 
     private static void dropMongoDatabase() {

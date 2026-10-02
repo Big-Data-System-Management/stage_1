@@ -7,6 +7,7 @@ import controller.store.Store;
 import model.Book;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.runner.RunnerException;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,5 +116,9 @@ public class RecoveryBehavior {
                         .forEach(File::delete);
             }
         }
+    }
+
+    public static void main(String[] args) throws RunnerException {
+        BenchmarkRunner.run(RecoveryBehavior.class);
     }
 }

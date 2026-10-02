@@ -11,10 +11,7 @@ import model.Book;
 import model.RawBook;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -149,9 +146,6 @@ public class BookDataProcessBenchmark {
     }
 
     public static void main(String[] args) throws RunnerException {
-        Options options = new OptionsBuilder()
-                .include(BookDataProcessBenchmark.class.getSimpleName())
-                .build();
-        new Runner(options).run();
+        BenchmarkRunner.run(BookDataProcessBenchmark.class);
     }
 }
