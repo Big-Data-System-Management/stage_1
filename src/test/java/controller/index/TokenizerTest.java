@@ -37,6 +37,11 @@ class TokenizerTest {
     }
 
     @Test
+    void foldsFinalSigma() {
+        assertEquals(List.of("οδοσ", "οδοσ", "οδοσ", "βασ"), tokenizer.tokenize("ΟΔΟΣ οδος ΟΔΟΣ-ΒΑΣ"));
+    }
+
+    @Test
     void discardsTokensLongerThanFiftyCharacters() {
         String fifty = "x".repeat(50);
         String fiftyOne = "y".repeat(51);

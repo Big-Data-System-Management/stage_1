@@ -53,7 +53,7 @@ public class Tokenizer {
 
     private static String normalize(String text) {
         String decomposed = Normalizer.normalize(text, Normalizer.Form.NFD);
-        return COMBINING_MARKS.matcher(decomposed).replaceAll("").toLowerCase(Locale.ROOT);
+        return COMBINING_MARKS.matcher(decomposed).replaceAll("").toLowerCase(Locale.ROOT).replace('ς', 'σ');
     }
 
     private static Set<String> loadDefaultStopwords() {

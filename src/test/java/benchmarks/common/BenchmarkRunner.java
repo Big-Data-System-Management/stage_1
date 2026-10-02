@@ -17,7 +17,7 @@ import java.util.Map;
 
 public final class BenchmarkRunner {
 
-    public static final Path RESULTS_DIR = Path.of("benchmark", "results");
+    public static final Path RESULTS_DIR = Path.of("benchmark", "results", "java");
 
     private BenchmarkRunner() {}
 

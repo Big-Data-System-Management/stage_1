@@ -18,3 +18,7 @@
 /datalakeTimeHierarchy/
 /benchmark/raw
 /benchmark/results/
+
+# Python
+/python/.venv/
+__pycache__/
