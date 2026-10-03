@@ -4,7 +4,7 @@ from pathlib import Path
 
 from benchmarks import harness
 from benchmarks.datalake.benchmark_paths import STRATEGIES, create_store
-from benchmarks.harness import SINGLE_SHOT, BenchmarkState, benchmark
+from benchmarks.harness import SINGLE_SHOT, BenchmarkState, Iterations, benchmark
 from stage1.files import write_text
 from stage1.model import Book
 
@@ -13,6 +13,8 @@ class RecoveryBehaviorBenchmark(BenchmarkState):
     name = "benchmarks.datalake.RecoveryBehaviorBenchmark"
     modes = (SINGLE_SHOT,)
     unit = "ms"
+    warmup = Iterations(5)
+    measurement = Iterations(5)
     params = {"storeStrategy": STRATEGIES}
 
     def setup_invocation(self):
