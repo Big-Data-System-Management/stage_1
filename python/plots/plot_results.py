@@ -10,6 +10,20 @@ import pandas as pd
 
 from stage1.files import REPO_ROOT
 
+PANEL_WIDTH = 2.45
+PANEL_HEIGHT = 2.05
+HEADER_HEIGHT = 0.4
+plt.rcParams.update({
+    "font.size": 9,
+    "axes.titlesize": 8.5,
+    "axes.labelsize": 8.5,
+    "xtick.labelsize": 8,
+    "ytick.labelsize": 8,
+    "legend.fontsize": 8.5,
+    "lines.markersize": 4,
+    "errorbar.capsize": 2,
+})
+
 LANGUAGES = ["java", "python", "cpp"]
 LANGUAGE_LABELS = {"java": "Java", "python": "Python", "cpp": "C++"}
 LANGUAGE_COLORS = {"java": "#e76f00", "python": "#3776ab", "cpp": "#2a9d8f"}
@@ -62,7 +76,7 @@ def main():
 
 
 def save(figure, path):
-    figure.savefig(path, dpi=130, bbox_inches="tight")
+    figure.savefig(path, dpi=220, bbox_inches="tight")
     plt.close(figure)
     print(f"[PLOT] {path}")
 
@@ -86,7 +100,7 @@ def plot_jmh(name, frames):
     panels.sort(key=lambda panel: (panel["method"], panel["Mode"], *(ORDER.get(panel[p], 99) for p in panel_params)))
     columns = min(3, len(panels))
     rows = -(-len(panels) // columns)
-    figure, axes = plt.subplots(rows, columns, figsize=(5.2 * columns, 4 * rows), squeeze=False)
+    figure, axes = plt.subplots(rows, columns, figsize=(PANEL_WIDTH * columns, PANEL_HEIGHT * rows + HEADER_HEIGHT), squeeze=False)
     for axis, panel in zip(axes.flat, panels):
         mask = pd.Series(True, index=combined.index)
         for key, value in panel.items():
@@ -96,7 +110,7 @@ def plot_jmh(name, frames):
         title = f"{panel['method']} ({panel['Mode']})"
         if panel_params:
             title += " · " + " · ".join(str(panel[param]) for param in panel_params)
-        axis.set_title(title, fontsize=10)
+        axis.set_title(wrap_title(title))
         axis.set_ylabel(data["Unit"].iloc[0])
     for axis in list(axes.flat)[len(panels):]:
         axis.set_visible(False)
@@ -117,13 +131,13 @@ def plot_jmh_structures(name, frames):
         return None
     groups = sorted(combined[["method", "Mode"]].drop_duplicates().itertuples(index=False, name=None))
     languages = [language for language in LANGUAGES if language in frames]
-    figure, axes = plt.subplots(len(groups), len(languages), figsize=(5.2 * len(languages), 3.8 * len(groups)), squeeze=False)
+    figure, axes = plt.subplots(len(groups), len(languages), figsize=(PANEL_WIDTH * len(languages), PANEL_HEIGHT * len(groups) + HEADER_HEIGHT), squeeze=False)
     for row, (method, mode) in enumerate(groups):
         for column, language in enumerate(languages):
             axis = axes[row][column]
             data = combined[(combined["method"] == method) & (combined["Mode"] == mode) & (combined["language"] == language)]
             draw_structures(axis, data, compared, "Score", "Score Error (99.9%)")
-            axis.set_title(f"{LANGUAGE_LABELS[language]} · {method} ({mode})", fontsize=10)
+            axis.set_title(f"{LANGUAGE_LABELS[language]}\n{method} ({mode})")
             if not data.empty:
                 axis.set_ylabel(data["Unit"].iloc[0])
     return finish(figure, f"{name}: structure comparison")
@@ -133,14 +147,14 @@ def plot_storage_report_structures(frames):
     combined = combine(frames)
     languages = [language for language in LANGUAGES if language in frames]
     figure, axes = plt.subplots(len(STORAGE_METRICS), len(languages),
-                                figsize=(5.2 * len(languages), 3.6 * len(STORAGE_METRICS)), squeeze=False)
+                                figsize=(PANEL_WIDTH * len(languages), PANEL_HEIGHT * len(STORAGE_METRICS) + HEADER_HEIGHT), squeeze=False)
     for row, (metric, label) in enumerate(STORAGE_METRICS.items()):
         for column, language in enumerate(languages):
             data = combined[combined["language"] == language].copy()
             data["value"] = data[metric] if metric == "build_ms" else data[metric] / 1e6
             axis = axes[row][column]
             draw_structures(axis, data, "structure", "value", None)
-            axis.set_title(f"{LANGUAGE_LABELS[language]} · {label}", fontsize=10)
+            axis.set_title(f"{LANGUAGE_LABELS[language]} · {label}")
             axis.set_ylabel(label)
     return finish(figure, f"{STORAGE_REPORT}: structure comparison")
 
@@ -161,7 +175,7 @@ def draw_structures(axis, data, compared, value, error):
         for index, item in enumerate(values):
             axis.bar(index, rows[value].iloc[index], yerr=None if errors is None else errors.iloc[index], capsize=3,
                      label=item, color=COMPARED_COLORS.get(item))
-        axis.set_xticks(range(len(values)), values, fontsize=7)
+        axis.set_xticks(range(len(values)), [value.replace("_HIERARCHY", "") for value in values], fontsize=7.5)
     if needs_log_scale(data[value]):
         axis.set_yscale("log")
     axis.grid(axis="y", alpha=0.3)
@@ -187,12 +201,16 @@ def draw_bars(axis, data, x_param):
         positions = [i + (index - (len(languages) - 1) / 2) * width for i in range(len(categories))]
         axis.bar(positions, scores, width, yerr=errors, capsize=3,
                  label=LANGUAGE_LABELS[language], color=LANGUAGE_COLORS[language])
-    axis.set_xticks(range(len(categories)), [str(category) for category in categories], fontsize=8)
+    axis.set_xticks(range(len(categories)), [str(category).replace("_HIERARCHY", "") for category in categories])
     if x_param:
         axis.set_xlabel(x_param)
     if needs_log_scale(data["Score"]):
         axis.set_yscale("log")
     axis.grid(axis="y", alpha=0.3)
+
+
+def wrap_title(title):
+    return title.replace(" · ", "\n", 1) if len(title) > 34 else title
 
 
 def finish(figure, title):
@@ -201,10 +219,10 @@ def finish(figure, title):
         for handle, label in zip(*axis.get_legend_handles_labels()):
             handles.setdefault(label, handle)
     height = figure.get_figheight()
-    figure.suptitle(title, fontsize=13, y=1 - 0.15 / height)
-    figure.tight_layout(rect=(0, 0, 1, 1 - 0.7 / height))
+    figure.suptitle(title, fontsize=11, y=1 - 0.04 / height)
+    figure.tight_layout(rect=(0, 0, 1, 1 - HEADER_HEIGHT / height), pad=0.3, h_pad=0.8, w_pad=0.6)
     figure.legend(handles.values(), handles.keys(), loc="upper center", ncol=len(handles),
-                  bbox_to_anchor=(0.5, 1 - 0.5 / height), frameon=False)
+                  bbox_to_anchor=(0.5, 1 - 0.19 / height), frameon=False)
     return figure
 
 
@@ -217,7 +235,7 @@ def plot_storage_report(frames):
     combined = combine(frames)
     structures = ordered(combined["structure"])
     figure, axes = plt.subplots(len(STORAGE_METRICS), len(structures),
-                                figsize=(5 * len(structures), 3.6 * len(STORAGE_METRICS)), squeeze=False)
+                                figsize=(PANEL_WIDTH * len(structures), PANEL_HEIGHT * len(STORAGE_METRICS) + HEADER_HEIGHT), squeeze=False)
     for row, (metric, label) in enumerate(STORAGE_METRICS.items()):
         for column, structure in enumerate(structures):
             data = combined[combined["structure"] == structure].copy()
@@ -225,25 +243,25 @@ def plot_storage_report(frames):
             data["Score Error (99.9%)"] = 0
             axis = axes[row][column]
             draw_bars(axis, data, "books")
-            axis.set_title(f"{structure} · {label}", fontsize=10)
+            axis.set_title(f"{structure} · {label}")
             axis.set_ylabel(label)
     return finish(figure, f"{STORAGE_REPORT}: language comparison")
 
 
 def plot_storage_overhead(frames):
     frame = next(iter(frames.values()))
-    figure, axes = plt.subplots(1, len(OVERHEAD_METRICS), figsize=(4.2 * len(OVERHEAD_METRICS), 3.8), squeeze=False)
+    figure, axes = plt.subplots(1, len(OVERHEAD_METRICS), figsize=(2.2 * len(OVERHEAD_METRICS), PANEL_HEIGHT), squeeze=False)
     for axis, (metric, label) in zip(axes.flat, OVERHEAD_METRICS.items()):
         values = frame[metric]
         if metric == "size_bytes":
             values = values / 1e6
         elif metric == "average_file_size_bytes":
             values = values / 1e3
-        axis.bar(frame["strategy"], values, color="#6c757d")
-        axis.set_title(label, fontsize=10)
-        axis.tick_params(axis="x", labelsize=8, rotation=15)
+        axis.bar(frame["strategy"].str.replace("_HIERARCHY", ""), values, color="#6c757d")
+        axis.set_title(label)
+        axis.tick_params(axis="x", labelsize=7.5)
         axis.grid(axis="y", alpha=0.3)
-    figure.suptitle(f"{STORAGE_OVERHEAD} (identical in the three languages)", fontsize=13)
+    figure.suptitle(f"{STORAGE_OVERHEAD} (identical in the three languages)", fontsize=10)
     figure.tight_layout()
     return figure
 
