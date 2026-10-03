@@ -18,6 +18,7 @@
 /datalakeTimeHierarchy/
 /benchmark/raw
 /benchmark/results/
+/benchmark/plots/
 
 # Python
 /python/.venv/
