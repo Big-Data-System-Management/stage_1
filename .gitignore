@@ -22,3 +22,6 @@
 # Python
 /python/.venv/
 __pycache__/
+
+# C++
+/cpp/build/
