@@ -90,6 +90,6 @@ public class IndexQueryBenchmark {
     }
 
     public static void main(String[] args) throws RunnerException {
-        IndexBenchmarkSupport.run(IndexQueryBenchmark.class);
+        IndexBenchmarkSupport.run(IndexQueryBenchmark.class, args);
     }
 }

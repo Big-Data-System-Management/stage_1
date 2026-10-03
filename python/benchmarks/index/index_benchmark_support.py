@@ -1,4 +1,5 @@
 import shutil
+import sys
 
 from pymongo import MongoClient
 
@@ -52,10 +53,11 @@ def dispose(structure, index, work_dir):
 
 
 def run(state_class):
+    options = harness.parse_options(sys.argv[1:])
     structures = available_structures()
     if len(structures) < len(STRUCTURES):
         print("[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.")
-    harness.run(state_class, {**state_class.params, "structure": structures})
+    harness.run(state_class, {**state_class.params, "structure": structures}, options)
 
 
 def drop_mongo_database():

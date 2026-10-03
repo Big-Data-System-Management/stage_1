@@ -27,4 +27,4 @@ class LookUpCostBenchmark(BenchmarkState):
 
 
 if __name__ == "__main__":
-    harness.run(LookUpCostBenchmark)
+    harness.main(LookUpCostBenchmark)

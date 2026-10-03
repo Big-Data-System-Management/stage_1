@@ -1,8 +1,9 @@
 import itertools
 import math
 import statistics
+import sys
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from stage1.files import REPO_ROOT, write_text
 
@@ -72,8 +73,35 @@ class Result:
     params: dict
 
 
-def run(state_class, params=None):
+def parse_options(args):
+    options = {"params": {}}
+    flags = {"-wi": "warmup_iterations", "-i": "measurement_iterations", "-w": "warmup_seconds", "-r": "measurement_seconds"}
+    pairs = iter(args)
+    for flag in pairs:
+        value = next(pairs, None)
+        if value is None:
+            raise SystemExit(f"Falta el valor de {flag}")
+        if flag == "-p":
+            name, _, values = value.partition("=")
+            options["params"][name] = [int(v) if v.isdigit() else v for v in values.split(",")]
+        elif flag in flags:
+            number = value.removesuffix("s")
+            options[flags[flag]] = float(number) if flag in ("-w", "-r") else int(number)
+        else:
+            raise SystemExit(f"Opción desconocida: {flag}")
+    return options
+
+
+def main(state_class, params=None):
+    run(state_class, params, parse_options(sys.argv[1:]))
+
+
+def run(state_class, params=None, options=None):
+    options = options or {"params": {}}
     params = dict(state_class.params if params is None else params)
+    params.update(options["params"])
+    warmup = replace(state_class.warmup, **_overrides(options, "warmup"))
+    measurement = replace(state_class.measurement, **_overrides(options, "measurement"))
     methods = sorted(
         (getattr(state_class, attribute) for attribute in dir(state_class)
          if hasattr(getattr(state_class, attribute), "benchmark_name")),
@@ -83,13 +111,22 @@ def run(state_class, params=None):
     for method in methods:
         for mode in state_class.modes:
             for values in itertools.product(*params.values()):
-                results.append(_run_trial(state_class, method, mode, dict(zip(params, values))))
+                results.append(_run_trial(state_class, method, mode, dict(zip(params, values)), warmup, measurement))
     path = write_jmh_csv(state_class.name.rsplit(".", 1)[-1], results, sorted(params))
     print(f"[BENCHMARK] Resultados guardados en {path}")
     return results
 
 
-def _run_trial(state_class, method, mode, values):
+def _overrides(options, phase):
+    overrides = {}
+    if f"{phase}_iterations" in options:
+        overrides["count"] = options[f"{phase}_iterations"]
+    if f"{phase}_seconds" in options:
+        overrides["seconds"] = options[f"{phase}_seconds"]
+    return overrides
+
+
+def _run_trial(state_class, method, mode, values, warmup, measurement):
     unit = method.unit or state_class.unit
     label = _unit_label(mode, unit)
     benchmark_name = f"{state_class.name}.{method.benchmark_name}"
@@ -100,7 +137,7 @@ def _run_trial(state_class, method, mode, values):
     state.setup_trial()
     scores = []
     try:
-        for phase, iterations in (("Warmup", state_class.warmup), ("Iteration", state_class.measurement)):
+        for phase, iterations in (("Warmup", warmup), ("Iteration", measurement)):
             for i in range(iterations.count):
                 state.setup_iteration()
                 try:

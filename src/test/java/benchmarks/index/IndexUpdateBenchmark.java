@@ -65,6 +65,6 @@ public class IndexUpdateBenchmark {
     }
 
     public static void main(String[] args) throws RunnerException {
-        IndexBenchmarkSupport.run(IndexUpdateBenchmark.class);
+        IndexBenchmarkSupport.run(IndexUpdateBenchmark.class, args);
     }
 }

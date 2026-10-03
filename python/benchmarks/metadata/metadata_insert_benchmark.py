@@ -41,4 +41,4 @@ class MetadataInsertBenchmark(BenchmarkState):
 
 
 if __name__ == "__main__":
-    harness.run(MetadataInsertBenchmark)
+    harness.main(MetadataInsertBenchmark)

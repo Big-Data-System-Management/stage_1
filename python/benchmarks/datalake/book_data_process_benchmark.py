@@ -64,4 +64,4 @@ class BookDataProcessBenchmark(BenchmarkState):
 
 
 if __name__ == "__main__":
-    harness.run(BookDataProcessBenchmark)
+    harness.main(BookDataProcessBenchmark)

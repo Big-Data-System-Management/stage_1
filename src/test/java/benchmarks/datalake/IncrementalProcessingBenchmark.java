@@ -67,6 +67,6 @@ public class IncrementalProcessingBenchmark {
     }
 
     public static void main(String[] args) throws RunnerException {
-        BenchmarkRunner.run(IncrementalProcessingBenchmark.class);
+        BenchmarkRunner.run(IncrementalProcessingBenchmark.class, args);
     }
 }
