@@ -48,11 +48,11 @@ public final class IndexBenchmarkSupport {
         if (structure == IndexStructure.MONGO) dropMongoDatabase();
     }
 
-    public static void run(Class<?> benchmark) throws RunnerException {
+    public static void run(Class<?> benchmark, String[] args) throws RunnerException {
         String[] structures = availableStructures();
         if (structures.length < IndexStructure.values().length)
             System.out.println("[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.");
-        BenchmarkRunner.run(benchmark, Map.of("structure", structures));
+        BenchmarkRunner.run(benchmark, args, Map.of("structure", structures));
     }
 
     private static void dropMongoDatabase() {

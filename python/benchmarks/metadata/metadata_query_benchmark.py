@@ -54,4 +54,4 @@ class MetadataQueryBenchmark(BenchmarkState):
 
 
 if __name__ == "__main__":
-    harness.run(MetadataQueryBenchmark)
+    harness.main(MetadataQueryBenchmark)

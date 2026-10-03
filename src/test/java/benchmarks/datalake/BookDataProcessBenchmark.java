@@ -147,6 +147,6 @@ public class BookDataProcessBenchmark {
     }
 
     public static void main(String[] args) throws RunnerException {
-        BenchmarkRunner.run(BookDataProcessBenchmark.class);
+        BenchmarkRunner.run(BookDataProcessBenchmark.class, args);
     }
 }

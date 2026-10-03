@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 public class IndexStorageReport {
 
-    private static final int[] BOOK_COUNTS = {25, 50, 100};
+    private static final int[] DEFAULT_BOOK_COUNTS = {25, 50, 100};
     private static final long BLOCK_SIZE = 4096;
     private static final String HEADER = "structure,books,terms,build_ms,files,directories,content_bytes,disk_bytes,retained_heap_bytes";
 
@@ -46,9 +46,10 @@ public class IndexStorageReport {
         if (structures.size() < IndexStructure.values().length)
             System.out.println("[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.");
 
-        List<Book> allBooks = BenchmarkBooks.load(BOOK_COUNTS[BOOK_COUNTS.length - 1]);
+        int[] bookCounts = bookCounts(args);
+        List<Book> allBooks = BenchmarkBooks.load(bookCounts[bookCounts.length - 1]);
         List<Row> rows = new ArrayList<>();
-        for (int count : BOOK_COUNTS) {
+        for (int count : bookCounts) {
             List<Book> corpus = allBooks.subList(0, count);
             int terms = vocabularySize(corpus, tokenizer);
             for (IndexStructure structure : structures) {
@@ -58,6 +59,14 @@ public class IndexStorageReport {
             }
         }
         write(rows);
+    }
+
+    private static int[] bookCounts(String[] args) {
+        for (int i = 0; i + 1 < args.length; i++)
+            if (args[i].equals("-p") && args[i + 1].startsWith("books="))
+                return Stream.of(args[i + 1].substring("books=".length()).split(","))
+                        .mapToInt(Integer::parseInt).sorted().toArray();
+        return DEFAULT_BOOK_COUNTS;
     }
 
     private static Row measure(IndexStructure structure, List<Book> corpus, int terms, Tokenizer tokenizer) throws Exception {

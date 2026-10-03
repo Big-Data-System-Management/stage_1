@@ -4,6 +4,8 @@ import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.ChainedOptionsBuilder;
+import org.openjdk.jmh.runner.options.CommandLineOptionException;
+import org.openjdk.jmh.runner.options.CommandLineOptions;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.IOException;
@@ -21,21 +23,33 @@ public final class BenchmarkRunner {
 
     private BenchmarkRunner() {}
 
-    public static void run(Class<?> benchmark) throws RunnerException {
-        run(benchmark, Map.of());
+    public static void run(Class<?> benchmark, String[] args) throws RunnerException {
+        run(benchmark, args, Map.of());
     }
 
-    public static void run(Class<?> benchmark, Map<String, String[]> params) throws RunnerException {
+    public static void run(Class<?> benchmark, String[] args, Map<String, String[]> params) throws RunnerException {
         Path resultFile = resultFile(benchmark);
         createResultsDirectory();
         Locale.setDefault(Locale.ROOT);
+        CommandLineOptions commandLine = commandLine(args);
         ChainedOptionsBuilder options = new OptionsBuilder()
+                .parent(commandLine)
                 .include(benchmark.getName())
                 .resultFormat(ResultFormatType.CSV)
                 .result(resultFile.toString());
-        params.forEach(options::param);
+        params.forEach((name, values) -> {
+            if (!commandLine.getParameter(name).hasValue()) options.param(name, values);
+        });
         new Runner(options.build()).run();
         System.out.println("[BENCHMARK] Resultados guardados en " + resultFile.toAbsolutePath());
+    }
+
+    private static CommandLineOptions commandLine(String[] args) {
+        try {
+            return new CommandLineOptions(args);
+        } catch (CommandLineOptionException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
     }
 
     public static Path resultFile(Class<?> benchmark) {

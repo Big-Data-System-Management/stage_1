@@ -59,4 +59,4 @@ class RecoveryBehaviorBenchmark(BenchmarkState):
 
 
 if __name__ == "__main__":
-    harness.run(RecoveryBehaviorBenchmark)
+    harness.main(RecoveryBehaviorBenchmark)

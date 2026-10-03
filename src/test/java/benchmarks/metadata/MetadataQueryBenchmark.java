@@ -80,6 +80,6 @@ public class MetadataQueryBenchmark {
     }
 
     public static void main(String[] args) throws RunnerException {
-        BenchmarkRunner.run(MetadataQueryBenchmark.class);
+        BenchmarkRunner.run(MetadataQueryBenchmark.class, args);
     }
 }

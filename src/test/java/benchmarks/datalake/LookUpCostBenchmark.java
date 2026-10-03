@@ -51,6 +51,6 @@ public class LookUpCostBenchmark {
     }
 
     public static void main(String[] args) throws RunnerException {
-        BenchmarkRunner.run(LookUpCostBenchmark.class);
+        BenchmarkRunner.run(LookUpCostBenchmark.class, args);
     }
 }

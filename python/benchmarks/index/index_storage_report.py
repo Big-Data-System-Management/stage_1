@@ -8,11 +8,11 @@ from pathlib import Path
 from pymongo import MongoClient
 
 from benchmarks import books
-from benchmarks.harness import write_csv
+from benchmarks.harness import parse_options, write_csv
 from benchmarks.index import index_benchmark_support as support
 from stage1.tokenizer import Tokenizer
 
-BOOK_COUNTS = [25, 50, 100]
+DEFAULT_BOOK_COUNTS = [25, 50, 100]
 BLOCK_SIZE = 4096
 HEADER = "structure,books,terms,build_ms,files,directories,content_bytes,disk_bytes,retained_heap_bytes"
 
@@ -22,9 +22,10 @@ def main():
     structures = support.available_structures()
     if len(structures) < len(support.STRUCTURES):
         print("[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.")
-    all_books = books.load(BOOK_COUNTS[-1])
+    book_counts = sorted(parse_options(sys.argv[1:])["params"].get("books", DEFAULT_BOOK_COUNTS))
+    all_books = books.load(book_counts[-1])
     rows = []
-    for count in BOOK_COUNTS:
+    for count in book_counts:
         corpus = all_books[:count]
         terms = vocabulary_size(corpus, tokenizer)
         for structure in structures:

@@ -120,6 +120,6 @@ public class RecoveryBehaviorBenchmark {
     }
 
     public static void main(String[] args) throws RunnerException {
-        BenchmarkRunner.run(RecoveryBehaviorBenchmark.class);
+        BenchmarkRunner.run(RecoveryBehaviorBenchmark.class, args);
     }
 }

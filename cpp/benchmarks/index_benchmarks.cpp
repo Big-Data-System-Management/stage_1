@@ -331,8 +331,13 @@ void run_index_benchmark(Definition definition, Options options) {
     run(std::move(definition), options);
 }
 
-void index_storage_report() {
-    const std::vector<int> counts = {25, 50, 100};
+void index_storage_report(const Options& options) {
+    std::vector<int> counts = {25, 50, 100};
+    if (auto books = options.params.find("books"); books != options.params.end()) {
+        counts.clear();
+        for (const std::string& value : books->second) counts.push_back(std::stoi(value));
+        std::sort(counts.begin(), counts.end());
+    }
     std::vector<std::string> structures = available_structures();
     if (structures.size() < STRUCTURES.size())
         std::cout << "[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.\n";

@@ -19,6 +19,7 @@
 /benchmark/raw
 /benchmark/results/
 /benchmark/plots/
+/benchmark/logs/
 
 # Python
 /python/.venv/

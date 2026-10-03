@@ -58,6 +58,6 @@ public class MetadataInsertBenchmark {
     }
 
     public static void main(String[] args) throws RunnerException {
-        BenchmarkRunner.run(MetadataInsertBenchmark.class);
+        BenchmarkRunner.run(MetadataInsertBenchmark.class, args);
     }
 }

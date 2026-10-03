@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
         {"IndexBuildBenchmark", [](const Options& o) { run_index_benchmark(index_build_benchmark(), o); }},
         {"IndexUpdateBenchmark", [](const Options& o) { run_index_benchmark(index_update_benchmark(), o); }},
         {"IndexQueryBenchmark", [](const Options& o) { run_index_benchmark(index_query_benchmark(), o); }},
-        {"IndexStorageReport", [](const Options&) { index_storage_report(); }},
+        {"IndexStorageReport", [](const Options& o) { index_storage_report(o); }},
         {"MetadataInsertBenchmark", [](const Options& o) { run(metadata_insert_benchmark(), o); }},
         {"MetadataQueryBenchmark", [](const Options& o) { run(metadata_query_benchmark(), o); }},
     };
