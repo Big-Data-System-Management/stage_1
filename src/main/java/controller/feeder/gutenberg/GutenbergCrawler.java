@@ -1,7 +1,7 @@
 package controller.feeder.gutenberg;
 
 import controller.feeder.BookCrawler;
-import model.RawBook; // Usamos tu modelo existente
+import model.RawBook;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -25,7 +25,6 @@ public class GutenbergCrawler implements BookCrawler {
                 String responseBody = GutenbergBookDownloader.downloadBook(bookId);
 
                 if (responseBody != null && !responseBody.isEmpty()) {
-                    // Empaquetamos el id y el contenido en el RawBook
                     rawBookConsumer.accept(new RawBook(bookId, responseBody));
                 }
             } catch (Exception e) {

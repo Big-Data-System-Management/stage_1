@@ -93,7 +93,7 @@ public final class GutenbergBookDownloader {
                 throw new IOException("Internal server error (HTTP " + statusCode + ")");
             }
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // Restore the interrupt flag
+            Thread.currentThread().interrupt();
             throw e;
         }
 
