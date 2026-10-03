@@ -21,7 +21,7 @@ def main():
     tokenizer = Tokenizer()
     structures = support.available_structures()
     if len(structures) < len(support.STRUCTURES):
-        print("[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.")
+        print("[BENCHMARK] MongoDB is not running: skipping the MONGO structure.")
     book_counts = sorted(parse_options(sys.argv[1:])["params"].get("books", DEFAULT_BOOK_COUNTS))
     all_books = books.load(book_counts[-1])
     rows = []
@@ -33,7 +33,7 @@ def main():
             rows.append(row)
             print_row(row)
     path = write_csv("IndexStorageReport", HEADER, [",".join(map(str, row)) for row in rows])
-    print(f"[BENCHMARK] Resultados guardados en {path}")
+    print(f"[BENCHMARK] Results saved to {path}")
 
 
 def measure(structure, corpus, terms, tokenizer):
@@ -108,10 +108,10 @@ def mongo_disk_usage():
 
 def print_row(row):
     structure, count, terms, build_millis, files, _, content_bytes, disk_bytes, retained = row
-    unit = "documentos" if structure == "MONGO" else "ficheros"
-    print(f"[BENCHMARK] {structure:<6} {count:3d} libros | {terms:7,d} términos | {build_millis:8,d} ms | "
-          f"{files:7,d} {unit:<10} | {content_bytes / 1e6:8,.2f} MB contenido | "
-          f"{disk_bytes / 1e6:8,.2f} MB en disco | {retained / 1e6:8,.2f} MB heap")
+    unit = "documents" if structure == "MONGO" else "files"
+    print(f"[BENCHMARK] {structure:<6} {count:3d} books | {terms:7,d} terms | {build_millis:8,d} ms | "
+          f"{files:7,d} {unit:<10} | {content_bytes / 1e6:8,.2f} MB content | "
+          f"{disk_bytes / 1e6:8,.2f} MB on disk | {retained / 1e6:8,.2f} MB heap")
 
 
 if __name__ == "__main__":

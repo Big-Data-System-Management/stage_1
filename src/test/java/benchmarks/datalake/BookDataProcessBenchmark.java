@@ -63,7 +63,7 @@ public class BookDataProcessBenchmark {
             parsedBooks.addAll(parsed);
         }
         if (rawBooks.size() < TOTAL_BOOKS)
-            throw new IllegalStateException("Solo hay " + rawBooks.size() + " libros válidos, se necesitan " + TOTAL_BOOKS);
+            throw new IllegalStateException("Only " + rawBooks.size() + " valid books, needed: " + TOTAL_BOOKS);
     }
 
     @Setup(Level.Iteration)
@@ -77,7 +77,7 @@ public class BookDataProcessBenchmark {
     public void checkAndDeleteDatalake() throws IOException {
         try {
             if (storedBooks != TOTAL_BOOKS)
-                throw new IllegalStateException("Se guardaron " + storedBooks + " libros de " + TOTAL_BOOKS);
+                throw new IllegalStateException("Stored " + storedBooks + " books of " + TOTAL_BOOKS);
         } finally {
             deleteRecursively(iterationDatalake);
         }
@@ -134,7 +134,7 @@ public class BookDataProcessBenchmark {
             case "TIME_HIERARCHY" -> new DatalakeLocalStoreTimeHierarchy(path);
             case "BOOK_HIERARCHY" -> new DatalakeLocalStoreBookHierarchy(path);
             case "ID_RANGE_HIERARCHY" -> new DatalakeLocalStoreIdRangeHierarchy(path);
-            default -> throw new IllegalArgumentException("Estrategia no reconocida: " + storeStrategy);
+            default -> throw new IllegalArgumentException("Unknown strategy: " + storeStrategy);
         };
     }
 

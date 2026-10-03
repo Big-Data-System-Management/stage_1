@@ -19,7 +19,7 @@ def load(count, max_book_id=MAX_BOOK_ID_TO_TRY):
         if book is not None:
             books.append(book)
     if len(books) < count:
-        raise RuntimeError(f"Solo hay {len(books)} libros válidos, se necesitan {count}")
+        raise RuntimeError(f"Only {len(books)} valid books, needed: {count}")
     return books
 
 

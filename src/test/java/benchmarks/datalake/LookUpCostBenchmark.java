@@ -37,10 +37,10 @@ public class LookUpCostBenchmark {
             case "TIME_HIERARCHY" -> new DatalakeLocalStoreTimeHierarchy(targetPath);
             case "BOOK_HIERARCHY" -> new DatalakeLocalStoreBookHierarchy(targetPath);
             case "ID_RANGE_HIERARCHY" -> new DatalakeLocalStoreIdRangeHierarchy(targetPath);
-            default -> throw new IllegalArgumentException("Estrategia no reconocida: " + storeStrategy);
+            default -> throw new IllegalArgumentException("Unknown strategy: " + storeStrategy);
         };
 
-        System.out.printf("%n[SETUP] Usando DataLake REAL en: %s%n", targetPath);
+        System.out.printf("%n[SETUP] Using the REAL datalake at: %s%n", targetPath);
     }
 
     @Benchmark

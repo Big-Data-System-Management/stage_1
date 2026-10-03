@@ -37,7 +37,7 @@ class MetadataInsertBenchmark(BenchmarkState):
         self.repository.close()
         shutil.rmtree(self.database_dir)
         if inserted != self.books:
-            raise RuntimeError(f"Se insertaron {inserted} libros de {self.books}")
+            raise RuntimeError(f"Inserted {inserted} books of {self.books}")
 
 
 if __name__ == "__main__":

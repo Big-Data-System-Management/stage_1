@@ -19,7 +19,7 @@ def create(structure, work_dir, tokenizer):
         return HierarchicalFolderIndex(work_dir / "inverted_index", tokenizer)
     if structure == "MONGO":
         return MongoInvertedIndex(MONGO_URI, MONGO_DATABASE, MONGO_COLLECTION, tokenizer)
-    raise ValueError(f"Estructura no soportada: {structure}")
+    raise ValueError(f"Unsupported structure: {structure}")
 
 
 def is_mongo_available():
@@ -39,7 +39,7 @@ def reset_mongo(structure):
     if structure != "MONGO":
         return
     if not is_mongo_available():
-        raise RuntimeError("MongoDB no está arrancado en localhost:27017")
+        raise RuntimeError("MongoDB is not running on localhost:27017")
     drop_mongo_database()
 
 
@@ -56,7 +56,7 @@ def run(state_class):
     options = harness.parse_options(sys.argv[1:])
     structures = available_structures()
     if len(structures) < len(STRUCTURES):
-        print("[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.")
+        print("[BENCHMARK] MongoDB is not running: skipping the MONGO structure.")
     harness.run(state_class, {**state_class.params, "structure": structures}, options)
 
 

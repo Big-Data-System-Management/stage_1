@@ -66,7 +66,7 @@ public:
         repository_.reset();
         fs::remove_all(database_dir_);
         if (inserted != books_)
-            throw std::runtime_error("Se insertaron " + std::to_string(inserted) + " libros de " + std::to_string(books_));
+            throw std::runtime_error("Inserted " + std::to_string(inserted) + " books of " + std::to_string(books_));
     }
 
     void insert_all_in_one_transaction() { repository_->save_all(metadata_); }

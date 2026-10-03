@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     };
     auto command = argc > 1 ? commands.find(argv[1]) : commands.end();
     if (command == commands.end()) {
-        std::cerr << "Uso: stage1_benchmarks <benchmark> [-wi N] [-i N] [-w segundos] [-r segundos] [-p nombre=v1,v2]\n";
+        std::cerr << "Usage: stage1_benchmarks <benchmark> [-wi N] [-i N] [-w seconds] [-r seconds] [-p name=v1,v2]\n";
         for (const auto& [name, _] : commands) std::cerr << "  " << name << "\n";
         return 1;
     }

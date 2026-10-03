@@ -39,7 +39,7 @@ public class ControlLayer {
         do {
             result = step();
         } while (result != StepResult.FINISHED);
-        System.out.println("[CONTROL] Pipeline terminado: " + registry.indexed().size() + " libros indexados.");
+        System.out.println("[CONTROL] Pipeline finished: " + registry.indexed().size() + " books indexed.");
     }
 
     public StepResult step() throws IOException {
@@ -63,7 +63,7 @@ public class ControlLayer {
             if (!store.exists(bookId)) downloader.executeBatch(bookId, bookId);
             if (store.exists(bookId)) {
                 registry.markDownloaded(bookId);
-                System.out.println("[CONTROL] Libro " + bookId + " descargado.");
+                System.out.println("[CONTROL] Book " + bookId + " downloaded.");
                 return true;
             }
         }
@@ -76,7 +76,7 @@ public class ControlLayer {
             Book book = store.getBook(bookId);
             if (book == null) {
                 registry.forgetDownloaded(bookId);
-                System.err.println("[CONTROL] Libro " + bookId + " registrado pero no encontrado en el datalake; se descargará de nuevo.");
+                System.err.println("[CONTROL] Book " + bookId + " registered but not found in the datalake; it will be downloaded again.");
                 continue;
             }
             index.indexBook(bookId, book.body());
@@ -84,6 +84,6 @@ public class ControlLayer {
         }
         index.flush();
         for (int bookId : indexedBooks) registry.markIndexed(bookId);
-        System.out.println("[CONTROL] Indexados " + indexedBooks.size() + " libros: " + indexedBooks);
+        System.out.println("[CONTROL] Indexed " + indexedBooks.size() + " books: " + indexedBooks);
     }
 }

@@ -20,7 +20,7 @@ public final class GutenbergBookDownloader {
             .build();
 
     private GutenbergBookDownloader() {
-        throw new UnsupportedOperationException("Clase de utilidad estática");
+        throw new UnsupportedOperationException("Static utility class");
     }
 
     public static String downloadBook(int bookId) throws IOException, InterruptedException {
@@ -76,27 +76,27 @@ public final class GutenbergBookDownloader {
     private static void manageOtherStatusCodes(int statusCode, int bookId) throws IOException, InterruptedException {
         try {
             if (statusCode == 403) {
-                System.err.printf("¡ALERTA CRÍTICA HTTP 403 en ID %d! Acceso denegado/Posible baneo. Pausando 2 minutos...%n", bookId);
+                System.err.printf("CRITICAL ALERT HTTP 403 for ID %d! Access denied/possible ban. Pausing 2 minutes...%n", bookId);
                 Thread.sleep(120_000);
-                throw new IOException("Acceso prohibido (HTTP 403)");
+                throw new IOException("Access forbidden (HTTP 403)");
             }
 
             if (statusCode == 429) {
-                System.err.printf("¡ALERTA HTTP 429 en ID %d! Servidor saturado. Pausando 1 minuto...%n", bookId);
+                System.err.printf("ALERT HTTP 429 for ID %d! Server overloaded. Pausing 1 minute...%n", bookId);
                 Thread.sleep(60_000);
-                throw new IOException("Demasiadas peticiones (HTTP 429)");
+                throw new IOException("Too many requests (HTTP 429)");
             }
 
             if (statusCode >= 500 && statusCode < 600) {
-                System.err.printf("Error del servidor HTTP %d en ID %d. Pausando 10 segundos...%n", statusCode, bookId);
+                System.err.printf("Server error HTTP %d for ID %d. Pausing 10 seconds...%n", statusCode, bookId);
                 Thread.sleep(10_000);
-                throw new IOException("Error interno del servidor (HTTP " + statusCode + ")");
+                throw new IOException("Internal server error (HTTP " + statusCode + ")");
             }
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // Restablece el flag de interrupción
+            Thread.currentThread().interrupt(); // Restore the interrupt flag
             throw e;
         }
 
-        throw new IOException("Error HTTP no clasificado: " + statusCode);
+        throw new IOException("Unclassified HTTP error: " + statusCode);
     }
 }

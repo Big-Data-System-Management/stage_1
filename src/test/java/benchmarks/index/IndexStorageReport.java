@@ -44,7 +44,7 @@ public class IndexStorageReport {
         List<IndexStructure> structures = Stream.of(IndexBenchmarkSupport.availableStructures())
                 .map(IndexStructure::valueOf).toList();
         if (structures.size() < IndexStructure.values().length)
-            System.out.println("[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.");
+            System.out.println("[BENCHMARK] MongoDB is not running: skipping the MONGO structure.");
 
         int[] bookCounts = bookCounts(args);
         List<Book> allBooks = BenchmarkBooks.load(bookCounts[bookCounts.length - 1]);
@@ -142,8 +142,8 @@ public class IndexStorageReport {
     }
 
     private static void print(Row row) {
-        String unit = row.structure() == IndexStructure.MONGO ? "documentos" : "ficheros";
-        System.out.printf(Locale.ROOT, "[BENCHMARK] %-6s %3d libros | %,7d términos | %,8d ms | %,7d %-10s | %,8.2f MB contenido | %,8.2f MB en disco | %,8.2f MB heap%n",
+        String unit = row.structure() == IndexStructure.MONGO ? "documents" : "files";
+        System.out.printf(Locale.ROOT, "[BENCHMARK] %-6s %3d books | %,7d terms | %,8d ms | %,7d %-10s | %,8.2f MB content | %,8.2f MB on disk | %,8.2f MB heap%n",
                 row.structure(), row.books(), row.terms(), row.buildMillis(), row.files(), unit,
                 row.contentBytes() / 1e6, row.diskBytes() / 1e6, row.retainedHeapBytes() / 1e6);
     }

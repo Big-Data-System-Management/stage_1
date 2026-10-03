@@ -33,7 +33,7 @@ public class IncrementalProcessingBenchmark {
     @Setup(Level.Trial)
     public void setupBenchmark() {
         this.activeStore = createStoreInstance();
-        System.out.printf("%n[SETUP] Evaluando índices sobre DataLake REAL (%s)...%n", storeStrategy);
+        System.out.printf("%n[SETUP] Evaluating indexes on the REAL datalake (%s)...%n", storeStrategy);
     }
 
     private Store createStoreInstance() {
@@ -42,7 +42,7 @@ public class IncrementalProcessingBenchmark {
             case "TIME_HIERARCHY" -> new DatalakeLocalStoreTimeHierarchy(targetPath);
             case "BOOK_HIERARCHY" -> new DatalakeLocalStoreBookHierarchy(targetPath);
             case "ID_RANGE_HIERARCHY" -> new DatalakeLocalStoreIdRangeHierarchy(targetPath);
-            default -> throw new IllegalArgumentException("Estrategia no reconocida: " + storeStrategy);
+            default -> throw new IllegalArgumentException("Unknown strategy: " + storeStrategy);
         };
     }
 

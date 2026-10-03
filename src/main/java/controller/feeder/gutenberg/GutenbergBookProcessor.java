@@ -20,7 +20,7 @@ public class GutenbergBookProcessor implements BookFeeder {
     @Override
     public void processData(RawBook rawBook, Consumer<Book> bookConsumer) {
         if (rawBookHaveNoContent(rawBook)) {
-            System.err.println("RawBook inválido o vacío.");
+            System.err.println("Invalid or empty RawBook.");
             return;
         }
         int bookId = rawBook.bookId();
@@ -28,7 +28,7 @@ public class GutenbergBookProcessor implements BookFeeder {
         Matcher start = START_MARKER.matcher(text);
         Matcher end = END_MARKER.matcher(text);
         if (!start.find() || !end.find(start.end())) {
-            System.err.println("Marcadores de Project Gutenberg no encontrados para el libro ID: " + bookId);
+            System.err.println("Project Gutenberg markers not found for book ID: " + bookId);
             return;
         }
         String header = text.substring(0, start.start()).strip();

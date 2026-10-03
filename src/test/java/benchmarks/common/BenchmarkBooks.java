@@ -31,7 +31,7 @@ public final class BenchmarkBooks {
             rawText(bookId).ifPresent(text -> feeder.processData(new RawBook(bookId, text), books::add));
         }
         if (books.size() < count)
-            throw new IllegalStateException("Solo hay " + books.size() + " libros válidos, se necesitan " + count);
+            throw new IllegalStateException("Only " + books.size() + " valid books, needed: " + count);
         return List.copyOf(books);
     }
 

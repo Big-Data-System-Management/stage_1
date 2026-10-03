@@ -22,7 +22,7 @@ public class Search {
             }
             Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
             while (true) {
-                System.out.print("Buscar (Enter vacío para salir): ");
+                System.out.print("Search (empty Enter to exit): ");
                 if (!scanner.hasNextLine()) return;
                 String term = scanner.nextLine().strip();
                 if (term.isEmpty()) return;
@@ -32,7 +32,7 @@ public class Search {
     }
 
     private static void print(String term, List<BookMetadata> results) {
-        System.out.printf("%d libros contienen \"%s\"%n", results.size(), term);
+        System.out.printf("%d books contain \"%s\"%n", results.size(), term);
         for (BookMetadata book : results)
             System.out.printf("  [%d] %s | %s | %s | %s%n",
                     book.bookId(), book.title(), book.author(), book.language(), book.bodyPath());

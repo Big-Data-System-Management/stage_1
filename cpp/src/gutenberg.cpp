@@ -38,7 +38,7 @@ bool is_gzip(std::string_view content) {
 
 std::string gunzip(std::string_view content) {
     z_stream stream{};
-    if (inflateInit2(&stream, 16 + MAX_WBITS) != Z_OK) throw std::runtime_error("Error iniciando zlib");
+    if (inflateInit2(&stream, 16 + MAX_WBITS) != Z_OK) throw std::runtime_error("Error initializing zlib");
     stream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(content.data()));
     stream.avail_in = static_cast<uInt>(content.size());
     std::string out;
@@ -53,7 +53,7 @@ std::string gunzip(std::string_view content) {
             inflateReset(&stream);
         } else if (status != Z_OK) {
             inflateEnd(&stream);
-            throw std::runtime_error("Contenido gzip corrupto");
+            throw std::runtime_error("Corrupt gzip content");
         }
     }
     inflateEnd(&stream);
@@ -71,21 +71,21 @@ void pause(int seconds) {
 
 void handle_status(long status_code, int book_id) {
     if (status_code == 403) {
-        std::cerr << "¡ALERTA CRÍTICA HTTP 403 en ID " << book_id << "! Acceso denegado/Posible baneo. Pausando 2 minutos...\n";
+        std::cerr << "CRITICAL ALERT HTTP 403 for ID " << book_id << "! Access denied/possible ban. Pausing 2 minutes...\n";
         pause(120);
-        throw std::runtime_error("Acceso prohibido (HTTP 403)");
+        throw std::runtime_error("Access forbidden (HTTP 403)");
     }
     if (status_code == 429) {
-        std::cerr << "¡ALERTA HTTP 429 en ID " << book_id << "! Servidor saturado. Pausando 1 minuto...\n";
+        std::cerr << "ALERT HTTP 429 for ID " << book_id << "! Server overloaded. Pausing 1 minute...\n";
         pause(60);
-        throw std::runtime_error("Demasiadas peticiones (HTTP 429)");
+        throw std::runtime_error("Too many requests (HTTP 429)");
     }
     if (status_code >= 500 && status_code < 600) {
-        std::cerr << "Error del servidor HTTP " << status_code << " en ID " << book_id << ". Pausando 10 segundos...\n";
+        std::cerr << "Server error HTTP " << status_code << " for ID " << book_id << ". Pausing 10 seconds...\n";
         pause(10);
-        throw std::runtime_error("Error interno del servidor (HTTP " + std::to_string(status_code) + ")");
+        throw std::runtime_error("Internal server error (HTTP " + std::to_string(status_code) + ")");
     }
-    throw std::runtime_error("Error HTTP no clasificado: " + std::to_string(status_code));
+    throw std::runtime_error("Unclassified HTTP error: " + std::to_string(status_code));
 }
 
 bool matches_ignore_case(std::string_view text, size_t& position, std::string_view expected) {
@@ -140,7 +140,7 @@ std::string decode(std::string_view content) {
 
 std::optional<std::string> download_book(int book_id) {
     static const bool initialized = curl_global_init(CURL_GLOBAL_DEFAULT) == CURLE_OK;
-    if (!initialized) throw std::runtime_error("Error iniciando libcurl");
+    if (!initialized) throw std::runtime_error("Error initializing libcurl");
     std::string url = "https://www.gutenberg.org/cache/epub/" + std::to_string(book_id) + "/pg" + std::to_string(book_id) + ".txt";
     std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl(curl_easy_init(), curl_easy_cleanup);
     curl_slist* headers = nullptr;
@@ -168,7 +168,7 @@ std::optional<Book> process(const RawBook& raw_book) {
     size_t body_start = start ? std::min(text.find_first_of("\r\n", start->end), text.size()) : 0;
     auto end = start ? find_marker(text, body_start, "END") : std::nullopt;
     if (!end) {
-        std::cerr << "Marcadores de Project Gutenberg no encontrados para el libro ID: " << raw_book.book_id << "\n";
+        std::cerr << "Project Gutenberg markers not found for book ID: " << raw_book.book_id << "\n";
         return std::nullopt;
     }
     std::string header(utf8::java_strip(text.substr(0, start->start)));

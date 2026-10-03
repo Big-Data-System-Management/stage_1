@@ -25,37 +25,37 @@ COMPARED_COLORS = {
 STORAGE_REPORT = "IndexStorageReport"
 STORAGE_OVERHEAD = "StorageOverheadBenchmark"
 STORAGE_METRICS = {
-    "build_ms": "Tiempo de construcción (ms)",
-    "disk_bytes": "Tamaño en disco (MB)",
-    "content_bytes": "Tamaño del contenido (MB)",
-    "retained_heap_bytes": "Memoria retenida (MB)",
+    "build_ms": "Build time (ms)",
+    "disk_bytes": "Size on disk (MB)",
+    "content_bytes": "Content size (MB)",
+    "retained_heap_bytes": "Retained memory (MB)",
 }
 OVERHEAD_METRICS = {
-    "files": "Ficheros",
-    "directories": "Directorios",
-    "size_bytes": "Tamaño total (MB)",
-    "average_file_size_bytes": "Tamaño medio por fichero (KB)",
+    "files": "Files",
+    "directories": "Directories",
+    "size_bytes": "Total size (MB)",
+    "average_file_size_bytes": "Average file size (KB)",
 }
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Genera gráficas comparando los resultados de los benchmarks.")
+    parser = argparse.ArgumentParser(description="Plots the benchmark results of every language.")
     parser.add_argument("--results", type=Path, default=REPO_ROOT / "benchmark" / "results")
     parser.add_argument("--output", type=Path, default=REPO_ROOT / "benchmark" / "plots")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     names = sorted({path.stem for language in LANGUAGES for path in (args.results / language).glob("*.csv")})
     if not names:
-        print(f"No hay resultados en {args.results}")
+        print(f"No results in {args.results}")
     for name in names:
         frames = load(args.results, name)
         if name == STORAGE_OVERHEAD:
             save(plot_storage_overhead(frames), args.output / f"{name}.png")
             continue
         if name == STORAGE_REPORT:
-            figures = {"lenguajes": plot_storage_report(frames), "estructuras": plot_storage_report_structures(frames)}
+            figures = {"languages": plot_storage_report(frames), "structures": plot_storage_report_structures(frames)}
         else:
-            figures = {"lenguajes": plot_jmh(name, frames), "estructuras": plot_jmh_structures(name, frames)}
+            figures = {"languages": plot_jmh(name, frames), "structures": plot_jmh_structures(name, frames)}
         for suffix, figure in figures.items():
             if figure is not None:
                 save(figure, args.output / f"{name}_{suffix}.png")
@@ -100,7 +100,7 @@ def plot_jmh(name, frames):
         axis.set_ylabel(data["Unit"].iloc[0])
     for axis in list(axes.flat)[len(panels):]:
         axis.set_visible(False)
-    return finish(figure, f"{name}: comparación de lenguajes")
+    return finish(figure, f"{name}: language comparison")
 
 
 def combine(frames):
@@ -126,7 +126,7 @@ def plot_jmh_structures(name, frames):
             axis.set_title(f"{LANGUAGE_LABELS[language]} · {method} ({mode})", fontsize=10)
             if not data.empty:
                 axis.set_ylabel(data["Unit"].iloc[0])
-    return finish(figure, f"{name}: comparación de estructuras")
+    return finish(figure, f"{name}: structure comparison")
 
 
 def plot_storage_report_structures(frames):
@@ -142,7 +142,7 @@ def plot_storage_report_structures(frames):
             draw_structures(axis, data, "structure", "value", None)
             axis.set_title(f"{LANGUAGE_LABELS[language]} · {label}", fontsize=10)
             axis.set_ylabel(label)
-    return finish(figure, f"{STORAGE_REPORT}: comparación de estructuras")
+    return finish(figure, f"{STORAGE_REPORT}: structure comparison")
 
 
 def draw_structures(axis, data, compared, value, error):
@@ -227,7 +227,7 @@ def plot_storage_report(frames):
             draw_bars(axis, data, "books")
             axis.set_title(f"{structure} · {label}", fontsize=10)
             axis.set_ylabel(label)
-    return finish(figure, f"{STORAGE_REPORT}: comparación de lenguajes")
+    return finish(figure, f"{STORAGE_REPORT}: language comparison")
 
 
 def plot_storage_overhead(frames):
@@ -243,7 +243,7 @@ def plot_storage_overhead(frames):
         axis.set_title(label, fontsize=10)
         axis.tick_params(axis="x", labelsize=8, rotation=15)
         axis.grid(axis="y", alpha=0.3)
-    figure.suptitle(f"{STORAGE_OVERHEAD} (idéntico en los tres lenguajes)", fontsize=13)
+    figure.suptitle(f"{STORAGE_OVERHEAD} (identical in the three languages)", fontsize=13)
     figure.tight_layout()
     return figure
 

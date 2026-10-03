@@ -18,11 +18,11 @@ public class StorageOverheadBenchmark {
         @Override
         public String toString() {
             return String.format("""
-                === MÉTRICAS DE ALMACENAMIENTO ===
-                Archivos totales     : %d
-                Directorios totales  : %d
-                Tamaño en disco (MB) : %.2f MB
-                Tamaño medio archivo : %d bytes
+                === STORAGE METRICS ===
+                Total files          : %d
+                Total directories    : %d
+                Size on disk (MB)    : %.2f MB
+                Average file size    : %d bytes
                 """,
                     totalFiles,
                     totalDirectories,
@@ -76,7 +76,7 @@ public class StorageOverheadBenchmark {
 
         for (String strategy : strategies) {
             String path = BenchmarkPaths.getPathForStrategy(strategy);
-            System.out.println("Estrategia: " + strategy + " -> Ruta: " + path);
+            System.out.println("Strategy: " + strategy + " -> Path: " + path);
             try {
                 if (Files.exists(Paths.get(path))) {
                     StorageMetrics metrics = analyze(path);
@@ -85,10 +85,10 @@ public class StorageOverheadBenchmark {
                             String.valueOf(metrics.totalDirectories()), String.valueOf(metrics.totalSizeBytes()),
                             String.valueOf(metrics.averageFileSize())));
                 } else {
-                    System.out.println("Ruta no encontrada para analizar.\n");
+                    System.out.println("Path not found, skipping.\n");
                 }
             } catch (IOException e) {
-                System.err.println("Error analizando almacenamiento para: " + strategy);
+                System.err.println("Error analyzing storage for: " + strategy);
                 e.printStackTrace();
             }
         }

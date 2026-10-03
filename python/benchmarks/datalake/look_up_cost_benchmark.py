@@ -19,7 +19,7 @@ class LookUpCostBenchmark(BenchmarkState):
     def setup_trial(self):
         target_path = path_for_strategy(self.storeStrategy)
         self.store = create_store(self.storeStrategy, target_path)
-        print(f"\n[SETUP] Usando DataLake REAL en: {target_path}")
+        print(f"\n[SETUP] Using the REAL datalake at: {target_path}")
 
     @benchmark("measureHeaderAndBodyLookup")
     def measure_header_and_body_lookup(self):

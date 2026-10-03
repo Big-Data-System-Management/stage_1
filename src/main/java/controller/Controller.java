@@ -43,10 +43,10 @@ public class Controller {
         this.bookConsumer = book -> {
             try {
                 Path bodyPath = store.storeData(book);
-                System.out.println("Libro guardado en Data Lake ID: " + book.id());
+                System.out.println("Book stored in data lake, ID: " + book.id());
                 if (metadataExtractor != null) metadataExtractor.extractAndProcess(book, bodyPath);
             } catch (IOException e) {
-                System.err.println("Error al guardar libro ID " + book.id() + ": " + e.getMessage());
+                System.err.println("Error storing book ID " + book.id() + ": " + e.getMessage());
             }
         };
         this.rawBookConsumer = (rb) -> feeder.processData(rb, bookConsumer);
@@ -58,7 +58,7 @@ public class Controller {
                     try {
                         executeBatch(startId, endId);
                     } catch (Exception e) {
-                        System.err.println("Error en la ejecución temporizada: " + e.getMessage());
+                        System.err.println("Error in scheduled execution: " + e.getMessage());
                     }
                 },
                 0,
@@ -68,7 +68,7 @@ public class Controller {
     }
 
     public void executeBatch(int startId, int endId) {
-        System.out.println("=== Iniciando ciclo de extracción ===");
+        System.out.println("=== Starting extraction cycle ===");
         IntPredicate shouldDownloadFilter = bookId -> {
             if (this.overwriteMode == OverwriteMode.OVERWRITE) {
                 return true;
@@ -76,6 +76,6 @@ public class Controller {
             return !store.exists(bookId);
         };
         crawler.crawl(startId, endId, shouldDownloadFilter, rawBookConsumer);
-        System.out.println("=== Ciclo de extracción finalizado ===");
+        System.out.println("=== Extraction cycle finished ===");
     }
 }

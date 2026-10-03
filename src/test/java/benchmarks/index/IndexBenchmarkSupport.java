@@ -38,7 +38,7 @@ public final class IndexBenchmarkSupport {
 
     public static void resetMongo(IndexStructure structure) {
         if (structure != IndexStructure.MONGO) return;
-        if (!isMongoAvailable()) throw new IllegalStateException("MongoDB no está arrancado en localhost:27017");
+        if (!isMongoAvailable()) throw new IllegalStateException("MongoDB is not running on localhost:27017");
         dropMongoDatabase();
     }
 
@@ -51,7 +51,7 @@ public final class IndexBenchmarkSupport {
     public static void run(Class<?> benchmark, String[] args) throws RunnerException {
         String[] structures = availableStructures();
         if (structures.length < IndexStructure.values().length)
-            System.out.println("[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.");
+            System.out.println("[BENCHMARK] MongoDB is not running: skipping the MONGO structure.");
         BenchmarkRunner.run(benchmark, args, Map.of("structure", structures));
     }
 

@@ -29,7 +29,7 @@ public class GutenbergCrawler implements BookCrawler {
                     rawBookConsumer.accept(new RawBook(bookId, responseBody));
                 }
             } catch (Exception e) {
-                System.err.printf("Error al procesar el libro ID %d: %s%n", bookId, e.getMessage());
+                System.err.printf("Error processing book ID %d: %s%n", bookId, e.getMessage());
             }
         }
     }

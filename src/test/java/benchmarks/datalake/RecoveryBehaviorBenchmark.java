@@ -53,7 +53,7 @@ public class RecoveryBehaviorBenchmark {
             case "TIME_HIERARCHY" -> new DatalakeLocalStoreTimeHierarchy(pathStr);
             case "BOOK_HIERARCHY" -> new DatalakeLocalStoreBookHierarchy(pathStr);
             case "ID_RANGE_HIERARCHY" -> new DatalakeLocalStoreIdRangeHierarchy(pathStr);
-            default -> throw new IllegalArgumentException("Estrategia no válida: " + storeStrategy);
+            default -> throw new IllegalArgumentException("Invalid strategy: " + storeStrategy);
         };
     }
 
@@ -62,7 +62,7 @@ public class RecoveryBehaviorBenchmark {
         Store store = createStoreInstance();
         boolean isCorruptedBookIndexed = store.exists(505);
         if (isCorruptedBookIndexed) {
-            throw new IllegalStateException("Fallo de recuperación: Se indexó un libro incompleto.");
+            throw new IllegalStateException("Recovery failure: an incomplete book was indexed.");
         }
         bh.consume(store);
     }
@@ -105,7 +105,7 @@ public class RecoveryBehaviorBenchmark {
                 yield tempDatalakePath.resolve(batchFolder);
             }
             case "TIME_HIERARCHY" -> tempDatalakePath.resolve("20260929").resolve("17");
-            default -> throw new IllegalArgumentException("Estrategia no válida: " + storeStrategy);
+            default -> throw new IllegalArgumentException("Invalid strategy: " + storeStrategy);
         };
     }
 

@@ -69,7 +69,7 @@ public class MonolithicJsonIndex implements InvertedIndex {
             TreeMap<String, TreeSet<Integer>> loaded = GSON.fromJson(reader, INDEX_TYPE);
             return loaded == null ? new TreeMap<>() : new TreeMap<>(loaded);
         } catch (IOException e) {
-            throw new UncheckedIOException("Error leyendo el índice " + indexFile, e);
+            throw new UncheckedIOException("Error reading index " + indexFile, e);
         }
     }
 }
