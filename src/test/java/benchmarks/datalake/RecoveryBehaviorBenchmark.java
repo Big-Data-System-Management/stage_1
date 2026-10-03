@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
 @Fork(value=1)
+@Warmup(iterations = 5)
+@Measurement(iterations = 5)
 public class RecoveryBehaviorBenchmark {
 
     @Param({"TIME_HIERARCHY", "BOOK_HIERARCHY", "ID_RANGE_HIERARCHY"})
