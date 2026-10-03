@@ -15,6 +15,8 @@ LANGUAGE_LABELS = {"java": "Java", "python": "Python", "cpp": "C++"}
 LANGUAGE_COLORS = {"java": "#e76f00", "python": "#3776ab", "cpp": "#2a9d8f"}
 X_PARAMS = ["books", "storeStrategy"]
 PANEL_PARAMS = ["structure"]
+ORDER = {value: index for index, value in enumerate(
+    ["JSON", "FOLDER", "MONGO", "TIME_HIERARCHY", "BOOK_HIERARCHY", "ID_RANGE_HIERARCHY"])}
 STORAGE_REPORT = "IndexStorageReport"
 STORAGE_OVERHEAD = "StorageOverheadBenchmark"
 STORAGE_METRICS = {
@@ -71,6 +73,7 @@ def plot_jmh(name, frames):
     x_param = next((param for param in X_PARAMS if param in combined.columns), None)
     panel_params = [param for param in PANEL_PARAMS if param in combined.columns]
     panels = combined[["method", "Mode", *panel_params]].drop_duplicates().to_dict("records")
+    panels.sort(key=lambda panel: (panel["method"], panel["Mode"], *(ORDER.get(panel[p], 99) for p in panel_params)))
     columns = min(3, len(panels))
     rows = -(-len(panels) // columns)
     figure, axes = plt.subplots(rows, columns, figsize=(5.2 * columns, 4 * rows), squeeze=False)
@@ -90,8 +93,15 @@ def plot_jmh(name, frames):
     return finish(figure, name)
 
 
+def ordered(values):
+    unique = list(dict.fromkeys(values))
+    if all(isinstance(value, str) for value in unique):
+        return sorted(unique, key=lambda value: ORDER.get(value, 99))
+    return sorted(unique)
+
+
 def draw_bars(axis, data, x_param):
-    categories = list(dict.fromkeys(data[x_param])) if x_param else ["-"]
+    categories = ordered(data[x_param]) if x_param else ["-"]
     languages = [language for language in LANGUAGES if language in set(data["language"])]
     width = 0.8 / max(1, len(languages))
     for index, language in enumerate(languages):
@@ -130,7 +140,7 @@ def needs_log_scale(scores):
 
 def plot_storage_report(frames):
     combined = pd.concat([frame.assign(language=language) for language, frame in frames.items()], ignore_index=True)
-    structures = list(dict.fromkeys(combined["structure"]))
+    structures = ordered(combined["structure"])
     figure, axes = plt.subplots(len(STORAGE_METRICS), len(structures),
                                 figsize=(5 * len(structures), 3.6 * len(STORAGE_METRICS)), squeeze=False)
     for row, (metric, label) in enumerate(STORAGE_METRICS.items()):
