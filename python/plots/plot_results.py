@@ -17,6 +17,11 @@ X_PARAMS = ["books", "storeStrategy"]
 PANEL_PARAMS = ["structure"]
 ORDER = {value: index for index, value in enumerate(
     ["JSON", "FOLDER", "MONGO", "TIME_HIERARCHY", "BOOK_HIERARCHY", "ID_RANGE_HIERARCHY"])}
+COMPARED_PARAMS = ["structure", "storeStrategy"]
+COMPARED_COLORS = {
+    "JSON": "#264653", "FOLDER": "#e9c46a", "MONGO": "#e76f51",
+    "TIME_HIERARCHY": "#8ecae6", "BOOK_HIERARCHY": "#219ebc", "ID_RANGE_HIERARCHY": "#023047",
+}
 STORAGE_REPORT = "IndexStorageReport"
 STORAGE_OVERHEAD = "StorageOverheadBenchmark"
 STORAGE_METRICS = {
@@ -44,16 +49,22 @@ def main():
         print(f"No hay resultados en {args.results}")
     for name in names:
         frames = load(args.results, name)
+        if name == STORAGE_OVERHEAD:
+            save(plot_storage_overhead(frames), args.output / f"{name}.png")
+            continue
         if name == STORAGE_REPORT:
-            figure = plot_storage_report(frames)
-        elif name == STORAGE_OVERHEAD:
-            figure = plot_storage_overhead(frames)
+            figures = {"lenguajes": plot_storage_report(frames), "estructuras": plot_storage_report_structures(frames)}
         else:
-            figure = plot_jmh(name, frames)
-        path = args.output / f"{name}.png"
-        figure.savefig(path, dpi=130, bbox_inches="tight")
-        plt.close(figure)
-        print(f"[PLOT] {path}")
+            figures = {"lenguajes": plot_jmh(name, frames), "estructuras": plot_jmh_structures(name, frames)}
+        for suffix, figure in figures.items():
+            if figure is not None:
+                save(figure, args.output / f"{name}_{suffix}.png")
+
+
+def save(figure, path):
+    figure.savefig(path, dpi=130, bbox_inches="tight")
+    plt.close(figure)
+    print(f"[PLOT] {path}")
 
 
 def load(results, name):
@@ -68,8 +79,7 @@ def load(results, name):
 
 
 def plot_jmh(name, frames):
-    combined = pd.concat([frame.assign(language=language) for language, frame in frames.items()], ignore_index=True)
-    combined["method"] = combined["Benchmark"].str.rsplit(".", n=1).str[-1]
+    combined = combine(frames)
     x_param = next((param for param in X_PARAMS if param in combined.columns), None)
     panel_params = [param for param in PANEL_PARAMS if param in combined.columns]
     panels = combined[["method", "Mode", *panel_params]].drop_duplicates().to_dict("records")
@@ -90,7 +100,71 @@ def plot_jmh(name, frames):
         axis.set_ylabel(data["Unit"].iloc[0])
     for axis in list(axes.flat)[len(panels):]:
         axis.set_visible(False)
-    return finish(figure, name)
+    return finish(figure, f"{name}: comparación de lenguajes")
+
+
+def combine(frames):
+    combined = pd.concat([frame.assign(language=language) for language, frame in frames.items()], ignore_index=True)
+    if "Benchmark" in combined.columns:
+        combined["method"] = combined["Benchmark"].str.rsplit(".", n=1).str[-1]
+    return combined
+
+
+def plot_jmh_structures(name, frames):
+    combined = combine(frames)
+    compared = next((param for param in COMPARED_PARAMS if param in combined.columns), None)
+    if compared is None:
+        return None
+    groups = sorted(combined[["method", "Mode"]].drop_duplicates().itertuples(index=False, name=None))
+    languages = [language for language in LANGUAGES if language in frames]
+    figure, axes = plt.subplots(len(groups), len(languages), figsize=(5.2 * len(languages), 3.8 * len(groups)), squeeze=False)
+    for row, (method, mode) in enumerate(groups):
+        for column, language in enumerate(languages):
+            axis = axes[row][column]
+            data = combined[(combined["method"] == method) & (combined["Mode"] == mode) & (combined["language"] == language)]
+            draw_structures(axis, data, compared, "Score", "Score Error (99.9%)")
+            axis.set_title(f"{LANGUAGE_LABELS[language]} · {method} ({mode})", fontsize=10)
+            if not data.empty:
+                axis.set_ylabel(data["Unit"].iloc[0])
+    return finish(figure, f"{name}: comparación de estructuras")
+
+
+def plot_storage_report_structures(frames):
+    combined = combine(frames)
+    languages = [language for language in LANGUAGES if language in frames]
+    figure, axes = plt.subplots(len(STORAGE_METRICS), len(languages),
+                                figsize=(5.2 * len(languages), 3.6 * len(STORAGE_METRICS)), squeeze=False)
+    for row, (metric, label) in enumerate(STORAGE_METRICS.items()):
+        for column, language in enumerate(languages):
+            data = combined[combined["language"] == language].copy()
+            data["value"] = data[metric] if metric == "build_ms" else data[metric] / 1e6
+            axis = axes[row][column]
+            draw_structures(axis, data, "structure", "value", None)
+            axis.set_title(f"{LANGUAGE_LABELS[language]} · {label}", fontsize=10)
+            axis.set_ylabel(label)
+    return finish(figure, f"{STORAGE_REPORT}: comparación de estructuras")
+
+
+def draw_structures(axis, data, compared, value, error):
+    values = ordered(data[compared])
+    if "books" in data.columns:
+        books = ordered(data["books"])
+        for item in values:
+            rows = data[data[compared] == item].set_index("books").reindex(books)
+            errors = rows[error].fillna(0).clip(upper=rows[value]) if error else None
+            axis.errorbar(books, rows[value], yerr=errors, marker="o", capsize=3, label=item, color=COMPARED_COLORS.get(item))
+        axis.set_xticks(books)
+        axis.set_xlabel("books")
+    else:
+        rows = data.set_index(compared).reindex(values)
+        errors = rows[error].fillna(0).clip(upper=rows[value]) if error else None
+        for index, item in enumerate(values):
+            axis.bar(index, rows[value].iloc[index], yerr=None if errors is None else errors.iloc[index], capsize=3,
+                     label=item, color=COMPARED_COLORS.get(item))
+        axis.set_xticks(range(len(values)), values, fontsize=7)
+    if needs_log_scale(data[value]):
+        axis.set_yscale("log")
+    axis.grid(axis="y", alpha=0.3)
 
 
 def ordered(values):
@@ -139,7 +213,7 @@ def needs_log_scale(scores):
 
 
 def plot_storage_report(frames):
-    combined = pd.concat([frame.assign(language=language) for language, frame in frames.items()], ignore_index=True)
+    combined = combine(frames)
     structures = ordered(combined["structure"])
     figure, axes = plt.subplots(len(STORAGE_METRICS), len(structures),
                                 figsize=(5 * len(structures), 3.6 * len(STORAGE_METRICS)), squeeze=False)
@@ -152,7 +226,7 @@ def plot_storage_report(frames):
             draw_bars(axis, data, "books")
             axis.set_title(f"{structure} · {label}", fontsize=10)
             axis.set_ylabel(label)
-    return finish(figure, STORAGE_REPORT)
+    return finish(figure, f"{STORAGE_REPORT}: comparación de lenguajes")
 
 
 def plot_storage_overhead(frames):
