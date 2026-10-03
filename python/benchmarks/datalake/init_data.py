@@ -16,7 +16,7 @@ def main():
         book = gutenberg.process(raw) if raw is not None else None
         if book is not None:
             store.store_data(book)
-            print(f"Libro {book_id} guardado")
+            print(f"Book {book_id} stored")
 
 
 if __name__ == "__main__":

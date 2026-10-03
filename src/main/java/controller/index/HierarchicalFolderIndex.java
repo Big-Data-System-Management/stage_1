@@ -87,7 +87,7 @@ public class HierarchicalFolderIndex implements InvertedIndex {
                     .map(Integer::parseInt)
                     .collect(Collectors.toCollection(TreeSet::new));
         } catch (IOException e) {
-            throw new UncheckedIOException("Error leyendo " + file, e);
+            throw new UncheckedIOException("Error reading " + file, e);
         }
     }
 

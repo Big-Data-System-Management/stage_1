@@ -20,11 +20,11 @@ STORES = {
 
 def path_for_strategy(strategy):
     if strategy not in PATHS:
-        raise ValueError(f"Estrategia no soportada: {strategy}")
+        raise ValueError(f"Unsupported strategy: {strategy}")
     return PATHS[strategy]
 
 
 def create_store(strategy, path):
     if strategy not in STORES:
-        raise ValueError(f"Estrategia no reconocida: {strategy}")
+        raise ValueError(f"Unknown strategy: {strategy}")
     return STORES[strategy](path)

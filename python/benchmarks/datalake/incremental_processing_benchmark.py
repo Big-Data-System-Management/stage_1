@@ -13,7 +13,7 @@ class IncrementalProcessingBenchmark(BenchmarkState):
 
     def setup_trial(self):
         self.store = self._create_store()
-        print(f"\n[SETUP] Evaluando índices sobre DataLake REAL ({self.storeStrategy})...")
+        print(f"\n[SETUP] Evaluating indexes on the REAL datalake ({self.storeStrategy})...")
 
     def _create_store(self):
         return create_store(self.storeStrategy, path_for_strategy(self.storeStrategy))

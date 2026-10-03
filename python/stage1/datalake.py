@@ -26,7 +26,7 @@ def _read_book(book_id, directory):
         body = read_text(directory / f"{book_id}{BODY_SUFFIX}")
         return Book(book_id, header, body)
     except OSError as error:
-        print(f"Error leyendo libro {book_id}: {error}", file=sys.stderr)
+        print(f"Error reading book {book_id}: {error}", file=sys.stderr)
         return None
 
 
@@ -45,7 +45,7 @@ class DatalakeLocalStoreBookHierarchy:
         self.existing_book_ids = set()
         if self.base_data_lake_path.exists():
             self.existing_book_ids.update(book_id for book_id, _ in _walk_bodies(self.base_data_lake_path))
-            print(f"[Store Book-Hierarchy] Índice cargado en RAM: {len(self.existing_book_ids)} libros detectados.")
+            print(f"[Store Book-Hierarchy] Index loaded in RAM: {len(self.existing_book_ids)} books detected.")
 
     def exists(self, book_id):
         return book_id in self.existing_book_ids
@@ -70,7 +70,7 @@ class DatalakeLocalStoreIdRangeHierarchy:
         self.existing_book_ids = set()
         if self.base_data_lake_path.exists():
             self.existing_book_ids.update(book_id for book_id, _ in _walk_bodies(self.base_data_lake_path))
-            print(f"[Store Batch-Hierarchy] Índice cargado en RAM: {len(self.existing_book_ids)} libros detectados.")
+            print(f"[Store Batch-Hierarchy] Index loaded in RAM: {len(self.existing_book_ids)} books detected.")
 
     def exists(self, book_id):
         return book_id in self.existing_book_ids
@@ -99,7 +99,7 @@ class DatalakeLocalStoreTimeHierarchy:
         self.book_directories = {}
         if self.base_data_lake_path.exists():
             self.book_directories.update(_walk_bodies(self.base_data_lake_path))
-            print(f"[Store] Índice cargado en RAM: {len(self.book_directories)} libros detectados.")
+            print(f"[Store] Index loaded in RAM: {len(self.book_directories)} books detected.")
 
     def exists(self, book_id):
         return book_id in self.book_directories

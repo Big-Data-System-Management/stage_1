@@ -90,7 +90,7 @@ Postings parse_postings(std::string_view content) {
         int book_id = 0;
         auto result = std::from_chars(value.data(), value.data() + value.size(), book_id);
         if (result.ec != std::errc() || result.ptr != value.data() + value.size())
-            throw std::runtime_error("Posting inválido: " + std::string(value));
+            throw std::runtime_error("Invalid posting: " + std::string(value));
         books.push_back(book_id);
     }
     std::sort(books.begin(), books.end());
@@ -248,7 +248,7 @@ MongoInvertedIndex::MongoInvertedIndex(const std::string& connection_uri, const 
     : tokenizer_(tokenizer) {
     ensure_mongo_initialized();
     client_ = mongoc_client_new(connection_uri.c_str());
-    if (!client_) throw std::runtime_error("URI de MongoDB inválida: " + connection_uri);
+    if (!client_) throw std::runtime_error("Invalid MongoDB URI: " + connection_uri);
     collection_ = mongoc_client_get_collection(client_, database_name.c_str(), collection_name.c_str());
     Bson keys(BCON_NEW(TERM_FIELD, BCON_INT32(1)));
     Bson unique(BCON_NEW("unique", BCON_BOOL(true)));
@@ -259,7 +259,7 @@ MongoInvertedIndex::MongoInvertedIndex(const std::string& connection_uri, const 
     if (!created) {
         mongoc_collection_destroy(collection_);
         mongoc_client_destroy(client_);
-        fail("Error creando el índice de MongoDB", error);
+        fail("Error creating the MongoDB index", error);
     }
 }
 
@@ -291,14 +291,14 @@ void MongoInvertedIndex::flush() {
         Bson update(add_each_to_set(book_ids));
         if (!mongoc_bulk_operation_update_one_with_opts(bulk, filter.value, update.value, upsert.value, &error)) {
             mongoc_bulk_operation_destroy(bulk);
-            fail("Error preparando el upsert", error);
+            fail("Error preparing the upsert", error);
         }
     }
     bson_t reply;
     bool executed = mongoc_bulk_operation_execute(bulk, &reply, &error) != 0;
     bson_destroy(&reply);
     mongoc_bulk_operation_destroy(bulk);
-    if (!executed) fail("Error en bulkWrite", error);
+    if (!executed) fail("Error in bulkWrite", error);
     pending_postings_.clear();
 }
 
@@ -318,7 +318,7 @@ Postings MongoInvertedIndex::read_postings(const std::string& term) {
     bson_error_t error;
     bool failed = mongoc_cursor_error(cursor, &error);
     mongoc_cursor_destroy(cursor);
-    if (failed) fail("Error leyendo de MongoDB", error);
+    if (failed) fail("Error reading from MongoDB", error);
     std::sort(books.begin(), books.end());
     books.erase(std::unique(books.begin(), books.end()), books.end());
     return books;

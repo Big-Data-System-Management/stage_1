@@ -32,7 +32,7 @@ class BookDataProcessBenchmark(BenchmarkState):
             self.raw_books.append(raw)
             self.parsed_books.append(book)
         if len(self.raw_books) < TOTAL_BOOKS:
-            raise RuntimeError(f"Solo hay {len(self.raw_books)} libros válidos, se necesitan {TOTAL_BOOKS}")
+            raise RuntimeError(f"Only {len(self.raw_books)} valid books, needed: {TOTAL_BOOKS}")
 
     def setup_iteration(self):
         self.datalake = Path(tempfile.mkdtemp(prefix=f"datalake_bench_{self.storeStrategy.lower()}_"))
@@ -42,7 +42,7 @@ class BookDataProcessBenchmark(BenchmarkState):
     def teardown_iteration(self):
         try:
             if self.stored_books != TOTAL_BOOKS:
-                raise RuntimeError(f"Se guardaron {self.stored_books} libros de {TOTAL_BOOKS}")
+                raise RuntimeError(f"Stored {self.stored_books} books of {TOTAL_BOOKS}")
         finally:
             shutil.rmtree(self.datalake)
 

@@ -24,7 +24,7 @@ double unit_nanos(const std::string& unit) {
     if (unit == "ms") return 1e6;
     if (unit == "us") return 1e3;
     if (unit == "ns") return 1;
-    throw std::invalid_argument("Unidad desconocida: " + unit);
+    throw std::invalid_argument("Unknown unit: " + unit);
 }
 
 std::string mode_label(Mode mode) {
@@ -171,7 +171,7 @@ Options parse_options(const std::vector<std::string>& args) {
     Options options;
     for (size_t i = 0; i < args.size(); ++i) {
         const std::string& flag = args[i];
-        if (i + 1 >= args.size()) throw std::invalid_argument("Falta el valor de " + flag);
+        if (i + 1 >= args.size()) throw std::invalid_argument("Missing value for " + flag);
         const std::string& value = args[++i];
         if (flag == "-wi") options.warmup_iterations = std::stoi(value);
         else if (flag == "-i") options.measurement_iterations = std::stoi(value);
@@ -179,10 +179,10 @@ Options parse_options(const std::vector<std::string>& args) {
         else if (flag == "-r") options.measurement_seconds = std::stod(value);
         else if (flag == "-p") {
             size_t equals = value.find('=');
-            if (equals == std::string::npos) throw std::invalid_argument("Formato de -p: nombre=v1,v2");
+            if (equals == std::string::npos) throw std::invalid_argument("Format of -p: name=v1,v2");
             options.params[value.substr(0, equals)] = split(value.substr(equals + 1), ',');
         } else {
-            throw std::invalid_argument("Opción desconocida: " + flag);
+            throw std::invalid_argument("Unknown option: " + flag);
         }
     }
     return options;
@@ -221,7 +221,7 @@ void run(Definition definition, const Options& options) {
     }
     std::string simple_name = definition.name.substr(definition.name.rfind('.') + 1);
     auto path = write_csv(simple_name, header, rows);
-    std::cout << "[BENCHMARK] Resultados guardados en " << files::to_string(path) << "\n";
+    std::cout << "[BENCHMARK] Results saved to " << files::to_string(path) << "\n";
 }
 
 std::filesystem::path results_dir() {

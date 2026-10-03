@@ -28,9 +28,9 @@ public class DatalakeLocalStoreTimeHierarchy implements Store {
         if (!Files.exists(basePath)) return;
         try (Stream<Path> stream = Files.walk(basePath)) {
             extractAndAddExistingIds(stream);
-            System.out.printf("[Store] Índice cargado en RAM: %d libros detectados.%n", bookDirectories.size());
+            System.out.printf("[Store] Index loaded in RAM: %d books detected.%n", bookDirectories.size());
         } catch (IOException e) {
-            System.err.println("Error indexando Data Lake: " + e.getMessage());
+            System.err.println("Error indexing data lake: " + e.getMessage());
         }
     }
 
@@ -64,7 +64,7 @@ public class DatalakeLocalStoreTimeHierarchy implements Store {
             String body = Files.readString(bodyPath);
             return new Book(id, header, body);
         } catch (IOException e) {
-            System.err.printf("Error leyendo libro %d: %s%n", id, e.getMessage());
+            System.err.printf("Error reading book %d: %s%n", id, e.getMessage());
             return null;
         }
     }

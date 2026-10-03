@@ -27,7 +27,7 @@ File open(const fs::path& path, const char* mode) {
 #else
     File file(std::fopen(path.c_str(), mode));
 #endif
-    if (!file) throw std::runtime_error("No se puede abrir " + to_string(path));
+    if (!file) throw std::runtime_error("Cannot open " + to_string(path));
     return file;
 }
 
@@ -64,13 +64,13 @@ std::string read(const fs::path& path) {
 void write(const fs::path& path, std::string_view content) {
     File file = open(path, "wb");
     if (!content.empty() && std::fwrite(content.data(), 1, content.size(), file.get()) != content.size())
-        throw std::runtime_error("Error escribiendo " + to_string(path));
+        throw std::runtime_error("Error writing " + to_string(path));
 }
 
 void replace(const fs::path& source, const fs::path& target) {
 #ifdef _WIN32
     if (!MoveFileExW(source.c_str(), target.c_str(), MOVEFILE_REPLACE_EXISTING))
-        throw std::runtime_error("Error moviendo " + to_string(source) + " a " + to_string(target));
+        throw std::runtime_error("Error moving " + to_string(source) + " to " + to_string(target));
 #else
     fs::rename(source, target);
 #endif

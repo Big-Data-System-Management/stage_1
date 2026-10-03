@@ -28,14 +28,14 @@ fs::path path_for_strategy(const std::string& strategy) {
     if (strategy == "TIME_HIERARCHY") return files::repo_root() / "datalakeTimeHierarchy";
     if (strategy == "BOOK_HIERARCHY") return files::repo_root() / "datalakeBookHierarchy";
     if (strategy == "ID_RANGE_HIERARCHY") return files::repo_root() / "datalakeIdRangeHierarchy";
-    throw std::invalid_argument("Estrategia no soportada: " + strategy);
+    throw std::invalid_argument("Unsupported strategy: " + strategy);
 }
 
 std::unique_ptr<Store> create_store(const std::string& strategy, const fs::path& path) {
     if (strategy == "TIME_HIERARCHY") return std::make_unique<DatalakeLocalStoreTimeHierarchy>(path);
     if (strategy == "BOOK_HIERARCHY") return std::make_unique<DatalakeLocalStoreBookHierarchy>(path);
     if (strategy == "ID_RANGE_HIERARCHY") return std::make_unique<DatalakeLocalStoreIdRangeHierarchy>(path);
-    throw std::invalid_argument("Estrategia no reconocida: " + strategy);
+    throw std::invalid_argument("Unknown strategy: " + strategy);
 }
 
 std::string lowercase(std::string text) {
@@ -57,7 +57,7 @@ public:
             parsed_books_.push_back(std::move(*book));
         }
         if (static_cast<int>(raw_books_.size()) < TOTAL_BOOKS)
-            throw std::runtime_error("Solo hay " + std::to_string(raw_books_.size()) + " libros válidos, se necesitan " + std::to_string(TOTAL_BOOKS));
+            throw std::runtime_error("Only " + std::to_string(raw_books_.size()) + " valid books, needed: " + std::to_string(TOTAL_BOOKS));
     }
 
     void setup_iteration() override {
@@ -70,7 +70,7 @@ public:
         store_.reset();
         fs::remove_all(datalake_);
         if (stored_books_ != TOTAL_BOOKS)
-            throw std::runtime_error("Se guardaron " + std::to_string(stored_books_) + " libros de " + std::to_string(TOTAL_BOOKS));
+            throw std::runtime_error("Stored " + std::to_string(stored_books_) + " books of " + std::to_string(TOTAL_BOOKS));
     }
 
     void measure_split_and_store() {
@@ -103,7 +103,7 @@ public:
 
     void setup_trial() override {
         store_ = create_store(strategy_, path_for_strategy(strategy_));
-        std::cout << "\n[SETUP] Evaluando índices sobre DataLake REAL (" << strategy_ << ")...\n";
+        std::cout << "\n[SETUP] Evaluating indexes on the REAL datalake (" << strategy_ << ")...\n";
     }
 
     void measure_cold_indexing_overhead() {
@@ -129,7 +129,7 @@ public:
     void setup_trial() override {
         fs::path target = path_for_strategy(strategy_);
         store_ = create_store(strategy_, target);
-        std::cout << "\n[SETUP] Usando DataLake REAL en: " << files::to_string(target) << "\n";
+        std::cout << "\n[SETUP] Using the REAL datalake at: " << files::to_string(target) << "\n";
     }
 
     void measure_header_and_body_lookup() { consume(store_->get_book(distribution_(random_))); }
@@ -162,7 +162,7 @@ public:
 
     void measure_recovery_time_after_crash() {
         auto store = create_store(strategy_, datalake_);
-        if (store->exists(505)) throw std::runtime_error("Fallo de recuperación: Se indexó un libro incompleto.");
+        if (store->exists(505)) throw std::runtime_error("Recovery failure: an incomplete book was indexed.");
         consume(store);
     }
 
@@ -187,7 +187,7 @@ private:
             return datalake_ / ("batch_" + std::to_string(batch * 1000) + "_to_" + std::to_string((batch + 1) * 1000 - 1));
         }
         if (strategy_ == "TIME_HIERARCHY") return datalake_ / "20260929" / "17";
-        throw std::invalid_argument("Estrategia no válida: " + strategy_);
+        throw std::invalid_argument("Invalid strategy: " + strategy_);
     }
 
     std::string strategy_;
@@ -237,9 +237,9 @@ void storage_overhead_benchmark() {
     std::vector<std::string> rows;
     for (const std::string& strategy : STRATEGIES) {
         fs::path path = path_for_strategy(strategy);
-        std::cout << "Estrategia: " << strategy << " -> Ruta: " << files::to_string(path) << "\n";
+        std::cout << "Strategy: " << strategy << " -> Path: " << files::to_string(path) << "\n";
         if (!files::exists(path)) {
-            std::cout << "Ruta no encontrada para analizar.\n\n";
+            std::cout << "Path not found, skipping.\n\n";
             continue;
         }
         long long file_count = 0, directories = 0, size = 0;
@@ -252,15 +252,15 @@ void storage_overhead_benchmark() {
             }
         });
         long long average = file_count > 0 ? size / file_count : 0;
-        std::printf("=== MÉTRICAS DE ALMACENAMIENTO ===\nArchivos totales     : %lld\nDirectorios totales  : %lld\n"
-                    "Tamaño en disco (MB) : %.2f MB\nTamaño medio archivo : %lld bytes\n\n",
+        std::printf("=== STORAGE METRICS ===\nTotal files          : %lld\nTotal directories    : %lld\n"
+                    "Size on disk (MB)    : %.2f MB\nAverage file size    : %lld bytes\n\n",
                     file_count, directories, size / (1024.0 * 1024.0), average);
         std::fflush(stdout);
         rows.push_back(strategy + "," + std::to_string(file_count) + "," + std::to_string(directories) + ","
                        + std::to_string(size) + "," + std::to_string(average));
     }
     auto path = write_csv("StorageOverheadBenchmark", "strategy,files,directories,size_bytes,average_file_size_bytes", rows);
-    std::cout << "[BENCHMARK] Resultados guardados en " << files::to_string(path) << "\n";
+    std::cout << "[BENCHMARK] Results saved to " << files::to_string(path) << "\n";
 }
 
 void init_data() {
@@ -273,7 +273,7 @@ void init_data() {
         if (!raw) continue;
         if (auto book = gutenberg::process(*raw)) {
             store.store_data(*book);
-            std::cout << "Libro " << book_id << " guardado\n";
+            std::cout << "Book " << book_id << " stored\n";
         }
     }
 }

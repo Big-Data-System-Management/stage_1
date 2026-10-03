@@ -21,19 +21,19 @@ def main():
     rows = []
     for strategy in STRATEGIES:
         path = path_for_strategy(strategy)
-        print(f"Estrategia: {strategy} -> Ruta: {path}")
+        print(f"Strategy: {strategy} -> Path: {path}")
         if not path.exists():
-            print("Ruta no encontrada para analizar.\n")
+            print("Path not found, skipping.\n")
             continue
         files, directories, size, average = analyze(path)
-        print("=== MÉTRICAS DE ALMACENAMIENTO ===")
-        print(f"Archivos totales     : {files}")
-        print(f"Directorios totales  : {directories}")
-        print(f"Tamaño en disco (MB) : {size / (1024 * 1024):.2f} MB")
-        print(f"Tamaño medio archivo : {average} bytes\n")
+        print("=== STORAGE METRICS ===")
+        print(f"Total files          : {files}")
+        print(f"Total directories    : {directories}")
+        print(f"Size on disk (MB)    : {size / (1024 * 1024):.2f} MB")
+        print(f"Average file size    : {average} bytes\n")
         rows.append(",".join(map(str, (strategy, files, directories, size, average))))
     path = write_csv("StorageOverheadBenchmark", HEADER, rows)
-    print(f"[BENCHMARK] Resultados guardados en {path}")
+    print(f"[BENCHMARK] Results saved to {path}")
 
 
 if __name__ == "__main__":

@@ -58,15 +58,15 @@ mongo_shutdown() {
 }
 
 prepare_java() {
-    log "Compilando Java"
-    [ -n "${JAVA_HOME:-}" ] || { log "Falta JAVA_HOME"; return 1; }
+    log "Building Java"
+    [ -n "${JAVA_HOME:-}" ] || { log "JAVA_HOME is not set"; return 1; }
     (cd "$ROOT" && "$MVN" -q test-compile) >> "$LOGS/build_java.log" 2>&1 || return 1
     (cd "$ROOT" && "$MVN" -q dependency:build-classpath -Dmdep.outputFile="$(windows_path "$LOGS/classpath.txt")") >> "$LOGS/build_java.log" 2>&1 || return 1
     JAVA_CP="$(windows_path "$ROOT/target/test-classes");$(windows_path "$ROOT/target/classes");$(cat "$LOGS/classpath.txt")"
 }
 
 prepare_cpp() {
-    log "Compilando C++"
+    log "Building C++"
     { cmake -S "$ROOT/cpp" -B "$CPP_BUILD" -G Ninja && cmake --build "$CPP_BUILD"; } >> "$LOGS/build_cpp.log" 2>&1
 }
 
@@ -81,7 +81,7 @@ run_benchmark() {
 }
 
 mkdir -p "$LOGS"
-log "Ejecución de benchmarks (QUICK=$QUICK, lenguajes: $LANGUAGES)"
+log "Benchmark run (QUICK=$QUICK, languages: $LANGUAGES)"
 
 if [ -z "$PYTHON" ]; then
     if [ -x "$ROOT/python/.venv/Scripts/python.exe" ]; then PYTHON=$ROOT/python/.venv/Scripts/python.exe; else PYTHON=$ROOT/python/.venv/bin/python; fi
@@ -90,8 +90,8 @@ fi
 ACTIVE=()
 for language in $LANGUAGES; do
     case $language in
-        java) prepare_java && ACTIVE+=(java) || log "ERROR compilando Java, se omite (ver build_java.log)" ;;
-        cpp) prepare_cpp && ACTIVE+=(cpp) || log "ERROR compilando C++, se omite (ver build_cpp.log)" ;;
+        java) prepare_java && ACTIVE+=(java) || log "ERROR building Java, skipped (see build_java.log)" ;;
+        cpp) prepare_cpp && ACTIVE+=(cpp) || log "ERROR building C++, skipped (see build_cpp.log)" ;;
         python) ACTIVE+=(python) ;;
     esac
 done
@@ -99,17 +99,17 @@ done
 STARTED_MONGO=0
 if ! mongo_ping; then
     if [ -n "$MONGOD" ]; then
-        log "Arrancando MongoDB"
+        log "Starting MongoDB"
         "$MONGOD" --dbpath "$MONGO_DBPATH" --bind_ip 127.0.0.1 >> "$LOGS/mongod.log" 2>&1 &
         for _ in $(seq 1 30); do mongo_ping && break; sleep 1; done
-        mongo_ping && STARTED_MONGO=1 || log "AVISO: MongoDB no arranca, se omitirá la estructura MONGO"
+        mongo_ping && STARTED_MONGO=1 || log "WARNING: MongoDB does not start, the MONGO structure will be skipped"
     else
-        log "AVISO: MongoDB no está arrancado, se omitirá la estructura MONGO"
+        log "WARNING: MongoDB is not running, the MONGO structure will be skipped"
     fi
 fi
 
 if [ ! -d "$ROOT/datalakeBookHierarchy" ]; then
-    log "Creando los datalakes compartidos (InitData)"
+    log "Creating the shared datalakes (InitData)"
     (cd "$ROOT/python" && PYTHONIOENCODING=utf-8 "$PYTHON" -m benchmarks.datalake.init_data) >> "$LOGS/init_data.log" 2>&1
 fi
 
@@ -124,19 +124,19 @@ for qualified in "${BENCHMARKS[@]}"; do
     [ "$QUICK" = 1 ] && args=$(quick_args "$name")
     for language in "${ACTIVE[@]}"; do
         start=$(date +%s)
-        log "INICIO $language $name $args"
+        log "START  $language $name $args"
         if run_benchmark "$language" "$qualified" "$args" > "$LOGS/${language}_${name}.log" 2>&1; then
             log "OK     $language $name ($(( $(date +%s) - start )) s)"
         else
             FAILED=$((FAILED + 1))
-            log "ERROR  $language $name ($(( $(date +%s) - start )) s), ver ${language}_${name}.log"
+            log "ERROR  $language $name ($(( $(date +%s) - start )) s), see ${language}_${name}.log"
         fi
     done
 done
 
-log "Generando gráficas"
-(cd "$ROOT/python" && PYTHONIOENCODING=utf-8 "$PYTHON" -m plots.plot_results) > "$LOGS/plots.log" 2>&1 || log "ERROR generando gráficas (ver plots.log)"
+log "Generating plots"
+(cd "$ROOT/python" && PYTHONIOENCODING=utf-8 "$PYTHON" -m plots.plot_results) > "$LOGS/plots.log" 2>&1 || log "ERROR generating plots (see plots.log)"
 
-[ "$STARTED_MONGO" = 1 ] && mongo_shutdown && log "MongoDB parado"
-log "Fin: $FAILED benchmarks con error. Logs en $LOGS"
+[ "$STARTED_MONGO" = 1 ] && mongo_shutdown && log "MongoDB stopped"
+log "Done: $FAILED benchmarks failed. Logs in $LOGS"
 [ "$FAILED" = 0 ]

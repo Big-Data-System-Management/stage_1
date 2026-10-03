@@ -52,7 +52,7 @@ public class MetadataInsertBenchmark {
     @TearDown(Level.Iteration)
     public void deleteDatabase() throws Exception {
         if (repository.count() != books)
-            throw new IllegalStateException("Se insertaron " + repository.count() + " libros de " + books);
+            throw new IllegalStateException("Inserted " + repository.count() + " books of " + books);
         repository.close();
         BenchmarkFiles.deleteRecursively(databaseDir);
     }

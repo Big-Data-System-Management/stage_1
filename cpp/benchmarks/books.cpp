@@ -28,7 +28,7 @@ std::vector<Book> load_books(int count, int max_book_id) {
         if (auto book = gutenberg::process(*raw)) books.push_back(std::move(*book));
     }
     if (static_cast<int>(books.size()) < count)
-        throw std::runtime_error("Solo hay " + std::to_string(books.size()) + " libros válidos, se necesitan " + std::to_string(count));
+        throw std::runtime_error("Only " + std::to_string(books.size()) + " valid books, needed: " + std::to_string(count));
     return books;
 }
 

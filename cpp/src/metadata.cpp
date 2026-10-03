@@ -164,7 +164,7 @@ SqliteMetadataRepository::SqliteMetadataRepository(const std::filesystem::path& 
     if (sqlite3_open(files::to_string(database_file).c_str(), &connection_) != SQLITE_OK) {
         std::string message = sqlite3_errmsg(connection_);
         sqlite3_close(connection_);
-        throw std::runtime_error("Error abriendo SQLite: " + message);
+        throw std::runtime_error("Error opening SQLite: " + message);
     }
     for (const char* statement : {CREATE_TABLE, CREATE_AUTHOR_INDEX, CREATE_TITLE_INDEX, CREATE_LANGUAGE_INDEX})
         execute(statement);
@@ -177,9 +177,9 @@ SqliteMetadataRepository::~SqliteMetadataRepository() {
 void SqliteMetadataRepository::execute(const char* sql) {
     char* error = nullptr;
     if (sqlite3_exec(connection_, sql, nullptr, nullptr, &error) != SQLITE_OK) {
-        std::string message = error ? error : "desconocido";
+        std::string message = error ? error : "unknown";
         sqlite3_free(error);
-        throw std::runtime_error("Error en SQLite: " + message);
+        throw std::runtime_error("SQLite error: " + message);
     }
 }
 

@@ -16,7 +16,7 @@ public final class BenchmarkPaths {
             case "TIME_HIERARCHY" -> PATH_TIME_HIERARCHY;
             case "BOOK_HIERARCHY" -> PATH_BOOK_HIERARCHY;
             case "ID_RANGE_HIERARCHY" -> PATH_ID_RANGE_HIERARCHY;
-            default -> throw new IllegalArgumentException("Estrategia no soportada: " + strategy);
+            default -> throw new IllegalArgumentException("Unsupported strategy: " + strategy);
         };
     }
 

@@ -31,7 +31,7 @@ class RecoveryBehaviorBenchmark(BenchmarkState):
     def measure_recovery_time_after_crash(self):
         store = create_store(self.storeStrategy, self.datalake)
         if store.exists(505):
-            raise RuntimeError("Fallo de recuperación: Se indexó un libro incompleto.")
+            raise RuntimeError("Recovery failure: an incomplete book was indexed.")
         return store
 
     @benchmark("measurePipelineResumeAndRepair")
@@ -55,7 +55,7 @@ class RecoveryBehaviorBenchmark(BenchmarkState):
             return self.datalake / f"batch_{batch * 1000}_to_{(batch + 1) * 1000 - 1}"
         if self.storeStrategy == "TIME_HIERARCHY":
             return self.datalake / "20260929" / "17"
-        raise ValueError(f"Estrategia no válida: {self.storeStrategy}")
+        raise ValueError(f"Invalid strategy: {self.storeStrategy}")
 
 
 if __name__ == "__main__":

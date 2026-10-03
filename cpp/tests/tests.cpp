@@ -30,7 +30,7 @@ std::vector<std::pair<std::string, std::function<void()>>> tests;
     do { \
         if (!(condition)) { \
             ++failures; \
-            std::cerr << "  FALLO " << __FILE__ << ":" << __LINE__ << ": " #condition "\n"; \
+            std::cerr << "  FAILED " << __FILE__ << ":" << __LINE__ << ": " #condition "\n"; \
         } \
     } while (false)
 
@@ -293,10 +293,10 @@ int main() {
             test();
         } catch (const std::exception& error) {
             ++failures;
-            std::cerr << "  EXCEPCIÓN: " << error.what() << "\n";
+            std::cerr << "  EXCEPTION: " << error.what() << "\n";
         }
-        std::cout << (failures == before ? "[OK]    " : "[FALLO] ") << name << "\n";
+        std::cout << (failures == before ? "[OK]    " : "[FAILED] ") << name << "\n";
     }
-    std::cout << tests.size() << " tests, " << failures << " fallos\n";
+    std::cout << tests.size() << " tests, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }

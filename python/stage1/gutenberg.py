@@ -45,29 +45,29 @@ def download_book(book_id):
 
 def _handle_status(status_code, book_id):
     if status_code == 403:
-        print(f"¡ALERTA CRÍTICA HTTP 403 en ID {book_id}! Acceso denegado/Posible baneo. Pausando 2 minutos...", file=sys.stderr)
+        print(f"CRITICAL ALERT HTTP 403 for ID {book_id}! Access denied/possible ban. Pausing 2 minutes...", file=sys.stderr)
         time.sleep(120)
-        raise OSError("Acceso prohibido (HTTP 403)")
+        raise OSError("Access forbidden (HTTP 403)")
     if status_code == 429:
-        print(f"¡ALERTA HTTP 429 en ID {book_id}! Servidor saturado. Pausando 1 minuto...", file=sys.stderr)
+        print(f"ALERT HTTP 429 for ID {book_id}! Server overloaded. Pausing 1 minute...", file=sys.stderr)
         time.sleep(60)
-        raise OSError("Demasiadas peticiones (HTTP 429)")
+        raise OSError("Too many requests (HTTP 429)")
     if 500 <= status_code < 600:
-        print(f"Error del servidor HTTP {status_code} en ID {book_id}. Pausando 10 segundos...", file=sys.stderr)
+        print(f"Server error HTTP {status_code} for ID {book_id}. Pausing 10 seconds...", file=sys.stderr)
         time.sleep(10)
-        raise OSError(f"Error interno del servidor (HTTP {status_code})")
-    raise OSError(f"Error HTTP no clasificado: {status_code}")
+        raise OSError(f"Internal server error (HTTP {status_code})")
+    raise OSError(f"Unclassified HTTP error: {status_code}")
 
 
 def process(raw_book):
     if raw_book is None or raw_book.body is None:
-        print("RawBook inválido o vacío.", file=sys.stderr)
+        print("Invalid or empty RawBook.", file=sys.stderr)
         return None
     text = raw_book.body
     start = START_MARKER.search(text)
     end = END_MARKER.search(text, start.end()) if start else None
     if end is None:
-        print(f"Marcadores de Project Gutenberg no encontrados para el libro ID: {raw_book.book_id}", file=sys.stderr)
+        print(f"Project Gutenberg markers not found for book ID: {raw_book.book_id}", file=sys.stderr)
         return None
     header = java_strip(text[:start.start()])
     body = java_strip(text[start.end():end.start()])

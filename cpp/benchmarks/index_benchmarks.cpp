@@ -82,7 +82,7 @@ void drop_mongo_database() {
 
 void reset_mongo(const std::string& structure) {
     if (structure != "MONGO") return;
-    if (!is_mongo_available()) throw std::runtime_error("MongoDB no está arrancado en localhost:27017");
+    if (!is_mongo_available()) throw std::runtime_error("MongoDB is not running on localhost:27017");
     drop_mongo_database();
 }
 
@@ -90,7 +90,7 @@ std::unique_ptr<InvertedIndex> create_index(const std::string& structure, const 
     if (structure == "JSON") return std::make_unique<MonolithicJsonIndex>(work_dir / "inverted_index.json", tokenizer);
     if (structure == "FOLDER") return std::make_unique<HierarchicalFolderIndex>(work_dir / "inverted_index", tokenizer);
     if (structure == "MONGO") return std::make_unique<MongoInvertedIndex>(MONGO_URI, MONGO_DATABASE, MONGO_COLLECTION, tokenizer);
-    throw std::invalid_argument("Estructura no soportada: " + structure);
+    throw std::invalid_argument("Unsupported structure: " + structure);
 }
 
 void dispose(const std::string& structure, std::unique_ptr<InvertedIndex>& index, const fs::path& work_dir) {
@@ -326,7 +326,7 @@ Definition index_query_benchmark() {
 void run_index_benchmark(Definition definition, Options options) {
     std::vector<std::string> structures = available_structures();
     if (structures.size() < STRUCTURES.size())
-        std::cout << "[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.\n";
+        std::cout << "[BENCHMARK] MongoDB is not running: skipping the MONGO structure.\n";
     if (!options.params.contains("structure")) options.params["structure"] = structures;
     run(std::move(definition), options);
 }
@@ -340,7 +340,7 @@ void index_storage_report(const Options& options) {
     }
     std::vector<std::string> structures = available_structures();
     if (structures.size() < STRUCTURES.size())
-        std::cout << "[BENCHMARK] MongoDB no está arrancado: se omite la estructura MONGO.\n";
+        std::cout << "[BENCHMARK] MongoDB is not running: skipping the MONGO structure.\n";
     std::vector<Book> all_books = load_books(counts.back());
     const Tokenizer& tokenizer = shared_tokenizer();
     std::vector<std::string> rows;
@@ -366,16 +366,16 @@ void index_storage_report(const Options& options) {
             rows.push_back(structure + "," + std::to_string(count) + "," + std::to_string(vocabulary.size()) + ","
                            + std::to_string(build_ms) + "," + std::to_string(disk.files) + "," + std::to_string(disk.directories) + ","
                            + std::to_string(disk.content_bytes) + "," + std::to_string(disk.disk_bytes) + "," + std::to_string(retained));
-            std::printf("[BENCHMARK] %-6s %3d libros | %7s términos | %8s ms | %7s %-10s | %8.2f MB contenido | %8.2f MB en disco | %8.2f MB heap\n",
+            std::printf("[BENCHMARK] %-6s %3d books | %7s terms | %8s ms | %7s %-10s | %8.2f MB content | %8.2f MB on disk | %8.2f MB heap\n",
                         structure.c_str(), count, grouped(static_cast<long long>(vocabulary.size())).c_str(), grouped(build_ms).c_str(),
-                        grouped(disk.files).c_str(), structure == "MONGO" ? "documentos" : "ficheros",
+                        grouped(disk.files).c_str(), structure == "MONGO" ? "documents" : "files",
                         disk.content_bytes / 1e6, disk.disk_bytes / 1e6, retained / 1e6);
             std::fflush(stdout);
         }
     }
     auto path = write_csv("IndexStorageReport",
                           "structure,books,terms,build_ms,files,directories,content_bytes,disk_bytes,retained_heap_bytes", rows);
-    std::cout << "[BENCHMARK] Resultados guardados en " << files::to_string(path) << "\n";
+    std::cout << "[BENCHMARK] Results saved to " << files::to_string(path) << "\n";
 }
 
 }

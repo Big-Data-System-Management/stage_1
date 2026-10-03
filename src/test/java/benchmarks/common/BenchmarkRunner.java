@@ -41,7 +41,7 @@ public final class BenchmarkRunner {
             if (!commandLine.getParameter(name).hasValue()) options.param(name, values);
         });
         new Runner(options.build()).run();
-        System.out.println("[BENCHMARK] Resultados guardados en " + resultFile.toAbsolutePath());
+        System.out.println("[BENCHMARK] Results saved to " + resultFile.toAbsolutePath());
     }
 
     private static CommandLineOptions commandLine(String[] args) {
@@ -62,7 +62,7 @@ public final class BenchmarkRunner {
         StringBuilder content = new StringBuilder(header).append('\n');
         rows.forEach(row -> content.append(row).append('\n'));
         Files.writeString(resultFile, content, StandardCharsets.UTF_8);
-        System.out.println("[BENCHMARK] Resultados guardados en " + resultFile.toAbsolutePath());
+        System.out.println("[BENCHMARK] Results saved to " + resultFile.toAbsolutePath());
     }
 
     private static void createResultsDirectory() {

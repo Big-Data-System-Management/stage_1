@@ -34,7 +34,7 @@ std::optional<Book> read_book(int book_id, const fs::path& directory) {
         std::string body = files::read(directory / (std::to_string(book_id) + std::string(BODY_SUFFIX)));
         return Book{book_id, std::move(header), std::move(body)};
     } catch (const std::exception& error) {
-        std::cerr << "Error leyendo libro " << book_id << ": " << error.what() << "\n";
+        std::cerr << "Error reading book " << book_id << ": " << error.what() << "\n";
         return std::nullopt;
     }
 }
@@ -65,7 +65,7 @@ std::string now(const char* format) {
 DatalakeLocalStoreBookHierarchy::DatalakeLocalStoreBookHierarchy(fs::path base_path) : base_path_(std::move(base_path)) {
     if (!files::exists(base_path_)) return;
     walk_bodies(base_path_, [this](int book_id, const fs::path&) { existing_book_ids_.insert(book_id); });
-    std::cout << "[Store Book-Hierarchy] Índice cargado en RAM: " << existing_book_ids_.size() << " libros detectados.\n";
+    std::cout << "[Store Book-Hierarchy] Index loaded in RAM: " << existing_book_ids_.size() << " books detected.\n";
 }
 
 fs::path DatalakeLocalStoreBookHierarchy::store_data(const Book& book) {
@@ -86,7 +86,7 @@ std::optional<Book> DatalakeLocalStoreBookHierarchy::get_book(int book_id) const
 DatalakeLocalStoreIdRangeHierarchy::DatalakeLocalStoreIdRangeHierarchy(fs::path base_path) : base_path_(std::move(base_path)) {
     if (!files::exists(base_path_)) return;
     walk_bodies(base_path_, [this](int book_id, const fs::path&) { existing_book_ids_.insert(book_id); });
-    std::cout << "[Store Batch-Hierarchy] Índice cargado en RAM: " << existing_book_ids_.size() << " libros detectados.\n";
+    std::cout << "[Store Batch-Hierarchy] Index loaded in RAM: " << existing_book_ids_.size() << " books detected.\n";
 }
 
 fs::path DatalakeLocalStoreIdRangeHierarchy::store_data(const Book& book) {
@@ -112,7 +112,7 @@ fs::path DatalakeLocalStoreIdRangeHierarchy::batch_directory(int book_id) const 
 DatalakeLocalStoreTimeHierarchy::DatalakeLocalStoreTimeHierarchy(fs::path base_path) : base_path_(std::move(base_path)) {
     if (!files::exists(base_path_)) return;
     walk_bodies(base_path_, [this](int book_id, const fs::path& directory) { book_directories_[book_id] = directory; });
-    std::cout << "[Store] Índice cargado en RAM: " << book_directories_.size() << " libros detectados.\n";
+    std::cout << "[Store] Index loaded in RAM: " << book_directories_.size() << " books detected.\n";
 }
 
 fs::path DatalakeLocalStoreTimeHierarchy::store_data(const Book& book) {

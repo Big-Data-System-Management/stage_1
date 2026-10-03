@@ -80,7 +80,7 @@ def parse_options(args):
     for flag in pairs:
         value = next(pairs, None)
         if value is None:
-            raise SystemExit(f"Falta el valor de {flag}")
+            raise SystemExit(f"Missing value for {flag}")
         if flag == "-p":
             name, _, values = value.partition("=")
             options["params"][name] = [int(v) if v.isdigit() else v for v in values.split(",")]
@@ -88,7 +88,7 @@ def parse_options(args):
             number = value.removesuffix("s")
             options[flags[flag]] = float(number) if flag in ("-w", "-r") else int(number)
         else:
-            raise SystemExit(f"Opción desconocida: {flag}")
+            raise SystemExit(f"Unknown option: {flag}")
     return options
 
 
@@ -113,7 +113,7 @@ def run(state_class, params=None, options=None):
             for values in itertools.product(*params.values()):
                 results.append(_run_trial(state_class, method, mode, dict(zip(params, values)), warmup, measurement))
     path = write_jmh_csv(state_class.name.rsplit(".", 1)[-1], results, sorted(params))
-    print(f"[BENCHMARK] Resultados guardados en {path}")
+    print(f"[BENCHMARK] Results saved to {path}")
     return results
 
 
