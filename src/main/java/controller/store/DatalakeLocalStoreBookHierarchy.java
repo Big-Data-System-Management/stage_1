@@ -1,0 +1,89 @@
+package controller.store;
+
+import model.Book;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
+
+public class DatalakeLocalStoreBookHierarchy implements Store {
+
+    private final String baseDataLakePath;
+    private final Set<Integer> existingBookIds = ConcurrentHashMap.newKeySet();
+
+    public DatalakeLocalStoreBookHierarchy(String baseDataLakePath) {
+        this.baseDataLakePath = baseDataLakePath;
+        this.indexExistingBooks();
+    }
+
+    private void indexExistingBooks() {
+        Path basePath = Paths.get(this.baseDataLakePath);
+        if (!Files.exists(basePath)) return;
+        try (Stream<Path> stream = Files.walk(basePath)) {
+            extractAndAddExistingIds(stream);
+            System.out.printf("[Store Book-Hierarchy] Index loaded in RAM: %d books detected.%n", existingBookIds.size());
+        } catch (IOException e) {
+            System.err.println("Error indexing data lake: " + e.getMessage());
+        }
+    }
+
+    private void extractAndAddExistingIds(Stream<Path> stream) {
+        stream.filter(Files::isRegularFile)
+                .map(path -> path.getFileName().toString())
+                .filter(name -> name.endsWith(".body.txt"))
+                .forEach(name -> {
+                    try {
+                        int id = Integer.parseInt(name.replace(".body.txt", ""));
+                        existingBookIds.add(id);
+                    } catch (NumberFormatException ignored) {}
+                });
+    }
+
+    @Override
+    public boolean exists(int bookId) {
+        return existingBookIds.contains(bookId);
+    }
+
+    @Override
+    public Book getBook(int id) {
+        if (!exists(id)) return null;
+
+        Path targetDir = Paths.get(this.baseDataLakePath, String.valueOf(id));
+        Path headerPath = targetDir.resolve(id + ".header.txt");
+        Path bodyPath = targetDir.resolve(id + ".body.txt");
+
+        try {
+            String header = Files.readString(headerPath);
+            String body = Files.readString(bodyPath);
+            return new Book(id, header, body);
+        } catch (IOException e) {
+            System.err.printf("Error reading book %d: %s%n", id, e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public Path storeData(Book book) throws IOException {
+        Path targetDir = Paths.get(this.baseDataLakePath, String.valueOf(book.id()));
+        Files.createDirectories(targetDir);
+
+        Path headerPath = targetDir.resolve(book.id() + ".header.txt");
+        Path bodyPath = targetDir.resolve(book.id() + ".body.txt");
+
+        writeAtomically(headerPath, book.head());
+        writeAtomically(bodyPath, book.body());
+        existingBookIds.add(book.id());
+        return bodyPath;
+    }
+
+    private static void writeAtomically(Path target, String content) throws IOException {
+        Path tmp = target.resolveSibling(target.getFileName() + ".tmp");
+        Files.writeString(tmp, content);
+        Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+    }
+}
