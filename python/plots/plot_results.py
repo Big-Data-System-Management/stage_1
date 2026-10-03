@@ -200,10 +200,11 @@ def finish(figure, title):
     for axis in figure.axes:
         for handle, label in zip(*axis.get_legend_handles_labels()):
             handles.setdefault(label, handle)
-    figure.suptitle(title, fontsize=13)
-    figure.tight_layout(rect=(0, 0, 1, 0.94))
+    height = figure.get_figheight()
+    figure.suptitle(title, fontsize=13, y=1 - 0.15 / height)
+    figure.tight_layout(rect=(0, 0, 1, 1 - 0.7 / height))
     figure.legend(handles.values(), handles.keys(), loc="upper center", ncol=len(handles),
-                  bbox_to_anchor=(0.5, 0.97), frameon=False)
+                  bbox_to_anchor=(0.5, 1 - 0.5 / height), frameon=False)
     return figure
 
 
